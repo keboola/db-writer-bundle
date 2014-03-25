@@ -1,3 +1,16 @@
-keboola_db_writer_homepage:
-    pattern:  /hello/{name}
-    defaults: { _controller: KeboolaDbWriterBundle:Default:index }
+
+# Configs
+keboola_db_writer_get_configs:
+    path: /configs
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getConfigs }
+    methods:  [GET]
+
+keboola_db_writer_post_configs:
+    path: /configs
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postConfigs }
+    methods:  [POST]
+
+keboola_db_writer_delete_configs:
+    path: /configs/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteConfig }
+    methods:  [DELETE]

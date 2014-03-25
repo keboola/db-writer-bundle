@@ -7,14 +7,13 @@
 
 namespace Keboola\DbWriterBundle;
 
-
-use Doctrine\DBAL\Driver\Mysqli\MysqliConnection;
+use Keboola\DbWriterBundle\Exception\ConfigurationException;
 use Keboola\DbWriterBundle\Exception\DbException;
+use Keboola\DbWriterBundle\Model\Manager;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Syrup\ComponentBundle\Component\Component;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDOSqlsrv\Driver;
-use Keboola\Csv\CsvFile;
 
 class DbWriter extends Component
 {
@@ -22,6 +21,42 @@ class DbWriter extends Component
 	protected $_prefix = 'wr';
 
 	protected $errorFilename = '';
+
+	public function createConfig($params)
+	{
+		$name = $params['name'];
+		$desc = isset($params['desc'])?$params['desc']:null;
+
+		$this->getManager()
+			->init()
+			->addAccount($name, $desc);
+	}
+
+	public function getConfigs()
+	{
+		$configs = $this->getConfig();
+		$res = array();
+
+		foreach ($configs['items'] as $k => $v) {
+			if (!isset($v['accountId'])) {
+				throw new ConfigurationException('Table `' . $k . '` is missing attribute accountId.');
+			}
+			if (!isset($v['name'])) {
+				throw new ConfigurationException('Table `' . $k . '` is missing attribute name.');
+			}
+			$res[] = array(
+				'id'    => $k,
+				'name'  => $v['name'],
+				'description'   => isset($v['description'])?$v['description']:''
+			);
+		}
+		return $res;
+	}
+
+	public function deleteConfig($id)
+	{
+		$this->getManager()->removeAccount($id);
+	}
 
 	protected function _process($config, $params)
 	{
@@ -44,8 +79,6 @@ class DbWriter extends Component
 				}
 			}
 		}
-
-
 	}
 
 	protected function getConnection($dbParams)
@@ -74,7 +107,7 @@ class DbWriter extends Component
 		$lineDelimiter = '\n';
 
 		$query = "LOAD DATA LOCAL INFILE '{$sourceFilename}'"
-			. " INTO TABLE {$output}"
+			. " REPLACE INTO TABLE {$output}"
 			. " COLUMNS TERMINATED BY ','"
 			. " OPTIONALLY ENCLOSED BY '".$fieldDelimiter."'"
 			. " ESCAPED BY ''"
@@ -114,6 +147,11 @@ class DbWriter extends Component
 		$this->_log->debug("Executing command " . $logged_command);
 
 		return exec($command);
+	}
+
+	private function getManager()
+	{
+		return new Manager($this->_storageApi, $this->getFullName());
 	}
 
 }
