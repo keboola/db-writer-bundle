@@ -68,10 +68,11 @@ class Manager
 	public function addRow($accountId, $input, $output)
 	{
 		$table = $this->getAccountTable($accountId);
-		$table->setFromArray(array(
+		$table->setFromArray(array(array(
+			'id'        => $this->storageApi->generateId(),
 			'input'     => $input,
 			'output'    => $output
-		));
+		)));
 		$table->save();
 	}
 
@@ -91,5 +92,14 @@ class Manager
 	public function removeAccount($accountId)
 	{
 		$this->storageApi->dropTable($this->getSysBucketId() . '.' . $accountId);
+	}
+
+	public function removeRow($accountId, $rowId)
+	{
+		$tableId = $this->getSysBucketId() . '.' . $accountId;
+		$this->storageApi->deleteTableRows($tableId, array(
+			'whereColumn'   => 'id',
+			'whereValues'   => $rowId
+		));
 	}
 }

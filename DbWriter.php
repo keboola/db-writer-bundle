@@ -9,11 +9,13 @@ namespace Keboola\DbWriterBundle;
 
 use Keboola\DbWriterBundle\Exception\ConfigurationException;
 use Keboola\DbWriterBundle\Exception\DbException;
+use Keboola\DbWriterBundle\Exception\ParameterMissingException;
 use Keboola\DbWriterBundle\Model\Manager;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Syrup\ComponentBundle\Component\Component;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDOSqlsrv\Driver;
+use Syrup\ComponentBundle\Exception\UserException;
 
 class DbWriter extends Component
 {
@@ -22,8 +24,19 @@ class DbWriter extends Component
 
 	protected $errorFilename = '';
 
+	protected function checkParams($required, $params)
+	{
+		foreach ($required as $r) {
+			if (!isset($params[$r])) {
+				throw new ParameterMissingException(sprintf("Parameter %s is missing.", $r));
+			}
+		}
+	}
+
 	public function createConfig($params)
 	{
+		$this->checkParams(array('name'), $params);
+
 		$name = $params['name'];
 		$desc = isset($params['desc'])?$params['desc']:null;
 
@@ -56,6 +69,29 @@ class DbWriter extends Component
 	public function deleteConfig($id)
 	{
 		$this->getManager()->removeAccount($id);
+	}
+
+	public function getRows($accountId)
+	{
+		$configs = $this->getConfig();
+		$items = $configs['items'];
+
+		if (!isset($items[$accountId])) {
+			throw new ConfigurationException('Account ID `' . $accountId .'` not found.');
+		}
+
+		return $configs['items'][$accountId]['items'];
+	}
+
+	public function addRow($accountId, $params)
+	{
+		$this->checkParams(array('input', 'output'), $params);
+		$this->getManager()->addRow($accountId, $params['input'], $params['output']);
+	}
+
+	public function deleteRow($accountId, $rowId)
+	{
+		$this->getManager()->removeRow($accountId, $rowId);
 	}
 
 	protected function _process($config, $params)

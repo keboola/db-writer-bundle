@@ -14,3 +14,19 @@ keboola_db_writer_delete_configs:
     path: /configs/{id}
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteConfig }
     methods:  [DELETE]
+
+# Rows
+keboola_db_writer_get_rows:
+    path: /rows/{accountId}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getRows }
+    methods:  [GET]
+
+keboola_db_writer_post_rows:
+    path: /rows/{accountId}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postRows }
+    methods:  [POST]
+
+keboola_db_writer_delete_rows:
+    path: /rows/{accountId}/{rowId}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteRows }
+    methods:  [DELETE]
