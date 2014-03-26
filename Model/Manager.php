@@ -102,4 +102,22 @@ class Manager
 			'whereValues'   => $rowId
 		));
 	}
+
+	public function addCredentials($accountId, $params)
+	{
+		$allowedParams = array('host', 'port', 'user', 'database');
+		$password = $params['password'];
+		$params = array_intersect_key($params, array_flip($allowedParams));
+
+		$account = $this->getAccountTable($accountId);
+
+		foreach ($params as $k => $v) {
+			$account->setAttribute('db.' . $k, $v);
+		}
+
+		// set password as protected
+		$this->storageApi->setTableAttribute($account->getId(), 'db.password', $password, true);
+
+		$account->save();
+	}
 }

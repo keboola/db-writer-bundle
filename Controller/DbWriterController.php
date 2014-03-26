@@ -31,6 +31,18 @@ class DbWriterController extends ApiController
 	}
 
 
+	/** Accounts */
+
+	public function postAccountAction($accountId)
+	{
+		$this->getComponent()->addAccount($accountId, $this->getPostJson($this->getRequest()));
+
+		return $this->createJsonResponse(array(
+			'status'      => 'ok'
+		));
+	}
+
+
 	/** Rows */
 
 	public function getRowsAction($accountId)

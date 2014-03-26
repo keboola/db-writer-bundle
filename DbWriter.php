@@ -94,6 +94,15 @@ class DbWriter extends Component
 		$this->getManager()->removeRow($accountId, $rowId);
 	}
 
+	public function addAccount($accountId, $params)
+	{
+		$this->checkParams(array(
+			'host', 'user', 'password', 'database'
+		), $params);
+
+		$this->getManager()->addCredentials($accountId, $params);
+	}
+
 	protected function _process($config, $params)
 	{
 		if (empty($config)) {
