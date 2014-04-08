@@ -86,7 +86,13 @@ class DbWriter extends Component
 	public function addRow($accountId, $params)
 	{
 		$this->checkParams(array('input', 'output'), $params);
-		$this->getManager()->addRow($accountId, $params['input'], $params['output']);
+
+		$rowConfig = '';
+		if (isset($params['config'])) {
+			$rowConfig = json_encode($params['config']);
+		}
+
+		$this->getManager()->addRow($accountId, $params['input'], $params['output'], $rowConfig);
 	}
 
 	public function deleteRow($accountId, $rowId)
@@ -110,7 +116,6 @@ class DbWriter extends Component
 		}
 
 		$items = $config['items'];
-
 		if (isset($params['account'])) {
 			$items = array($items[$params['account']]);
 		}
@@ -120,6 +125,10 @@ class DbWriter extends Component
 				$this->_db = $this->getConnection($conn['db']);
 
 				foreach ($conn['items'] as $table) {
+					$tableConfig = json_decode($table['config'], true);
+					if (isset($tableConfig['initTable'])) {
+						$this->runCommand(escapeshellcmd($tableConfig['initTable']));
+					}
 					$this->write($table['input'], $table['output']);
 				}
 			}
@@ -144,8 +153,6 @@ class DbWriter extends Component
 	{
 		$sourceFilename = $this->getTemp()->createTmpFile(null, true);
 
-		$errorFilename = $this->getTemp()->createTmpFile('.csv.error', true);
-
 		$this->_storageApi->exportTable($input, $sourceFilename);
 
 		$fieldDelimiter = '\"';
@@ -161,7 +168,24 @@ class DbWriter extends Component
 			. ";"
 		;
 
-		$result = $this->exec($this->buildCommand($query, $errorFilename));
+		$this->runCommand($query);
+	}
+
+	protected function runCommand($query)
+	{
+		$errorFilename = $this->getErrorFilename();
+
+		$dbConfig = $this->_db->getParams();
+
+		$command = 'mysql -u ' . escapeshellarg($dbConfig['user'])
+			. ' -P ' . escapeshellarg($dbConfig['port'])
+			. ' -p' . escapeshellarg($dbConfig['password'])
+			. ' -h ' . escapeshellarg($dbConfig['host'])
+			. ' ' . escapeshellarg($dbConfig['dbname'])
+			. ' -e "' . $query .'"'
+			. ' --quick 2> ' . $errorFilename;
+
+		$result = $this->exec($command);
 
 		if ($result != "" || file_exists($errorFilename) && filesize($errorFilename) > 0) {
 			$error = $result;
@@ -172,24 +196,15 @@ class DbWriter extends Component
 		}
 	}
 
-	protected function buildCommand($query, $errorFilename)
-	{
-		$dbConfig = $this->_db->getParams();
-
-		return 'mysql -u ' . escapeshellarg($dbConfig['user'])
-			. ' -P ' . escapeshellarg($dbConfig['port'])
-			. ' -p' . escapeshellarg($dbConfig['password'])
-			. ' -h ' . escapeshellarg($dbConfig['host'])
-			. ' ' . escapeshellarg($dbConfig['dbname'])
-			. ' -e "' . $query .'"'
-			. ' --quick 2> ' . $errorFilename;
-	}
-
 	protected function exec($command)
 	{
 		$password_pattern = "/\-p'[^']+'|\-P'[^']+'/";
 		$logged_command = preg_replace($password_pattern,"PASSWORD",$command);
 		$this->_log->debug("Executing command " . $logged_command);
+
+		$command = str_replace("\\(", "(", $command);
+		$command = str_replace("\\)", ")", $command);
+		$command = str_replace("\\;", ";", $command);
 
 		return exec($command);
 	}
@@ -197,6 +212,11 @@ class DbWriter extends Component
 	private function getManager()
 	{
 		return new Manager($this->_storageApi, $this->getFullName());
+	}
+
+	private function getErrorFilename()
+	{
+		return $this->getTemp()->createTmpFile('.csv.error', true);
 	}
 
 }

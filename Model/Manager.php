@@ -18,7 +18,9 @@ class Manager
 
 	protected $componentName;
 
-	protected $sys_prefix = 'sys.c-';
+	protected $sysPrefix = 'sys.c-';
+
+	protected $columns = array('id', 'input', 'output', 'config');
 
 	public function __construct(StorageApi $storageApi, $componentName)
 	{
@@ -44,7 +46,7 @@ class Manager
 
 	public function getSysBucketId()
 	{
-		return 'sys.c-' . $this->componentName;
+		return $this->sysPrefix . $this->componentName;
 	}
 
 	public function addAccount($name, $desc = null)
@@ -65,14 +67,20 @@ class Manager
 		$table->save();
 	}
 
-	public function addRow($accountId, $input, $output)
+	public function addRow($accountId, $input, $output, $config = '')
 	{
 		$table = $this->getAccountTable($accountId);
-		$table->setFromArray(array(array(
-			'id'        => $this->storageApi->generateId(),
-			'input'     => $input,
-			'output'    => $output
-		)));
+		$table->setFromArray(array(
+			array_combine(
+				$this->columns,
+				array(
+					$this->storageApi->generateId(),
+					$input,
+					$output,
+					$config
+				)
+			)
+		));
 		$table->save();
 	}
 
@@ -85,7 +93,7 @@ class Manager
 	{
 		$tableId = $this->getSysBucketId() . '.' . $accountId;
 		$table = new Table($this->storageApi, $tableId, '', 'id', false, ',', '"', true);
-		$table->setHeader(array('id','input','output'));
+		$table->setHeader($this->columns);
 		return $table;
 	}
 
@@ -119,5 +127,21 @@ class Manager
 		$this->storageApi->setTableAttribute($account->getId(), 'db.password', $password, true);
 
 		$account->save();
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getColumns()
+	{
+		return $this->columns;
+	}
+
+	/**
+	 * @param array $columns
+	 */
+	public function setColumns($columns)
+	{
+		$this->columns = $columns;
 	}
 }
