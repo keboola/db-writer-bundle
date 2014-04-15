@@ -1,5 +1,6 @@
 vendor
 composer.phar
-composer.lock
+parameters.yml
+parameters.yml.dist
 phpunit.xml
 web
