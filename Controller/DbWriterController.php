@@ -3,74 +3,112 @@
 namespace Keboola\DbWriterBundle\Controller;
 
 use Keboola\DbWriterBundle\DbWriter;
+use Keboola\DbWriterBundle\Exception\ParameterMissingException;
+use Keboola\DbWriterBundle\Writer\Configuration;
+use Symfony\Component\HttpFoundation\Request;
 use Syrup\ComponentBundle\Controller\ApiController;
 
 class DbWriterController extends ApiController
 {
-	/** Configs */
-
-	public function getConfigsAction()
+	/** @return Configuration */
+	protected function getConfiguration()
 	{
-		return $this->createJsonResponse($this->getComponent()->getConfigs());
+		return $this->container->get('keboola_db_writer.configuration_factory')->get($this->storageApi);
 	}
 
-	public function postConfigsAction()
+	protected function checkParams($required, $params)
 	{
-		$this->getComponent()->createConfig($this->getPostJson($this->getRequest()));
-
-		return $this->createJsonResponse(array(
-			'status'      => 'ok'
-		));
+		foreach ($required as $r) {
+			if (!isset($params[$r])) {
+				throw new ParameterMissingException(sprintf("Parameter %s is missing.", $r));
+			}
+		}
 	}
 
-	public function deleteConfigAction($id)
-	{
-		$this->getComponent()->deleteConfig($id);
+	/** Writers */
 
+	public function postWriterAction(Request $request)
+	{
+		$params = $this->getPostJson($request);
+		$this->checkParams([
+			'name', 'connection'
+		], $params);
+
+		$this->checkParams([
+			'host', 'database', 'user', 'password'
+		], $params['connection']);
+
+		$description = isset($params['description'])?$params['description']:'DB Writer configuration bucket';
+		$bucketId = $this->getConfiguration()
+			->createWriter($params['name'], $params['connection'], $description);
+
+		return $this->createJsonResponse([
+			'writerId'  => $params['name'],
+			'bucketId'  => $bucketId
+		]);
+	}
+
+	public function getWritersAction($id = null)
+	{
+		if ($id != null) {
+			return $this->createJsonResponse($this->getConfiguration()->getWriter($id));
+		}
+		return $this->createJsonResponse($this->getConfiguration()->getWriters());
+	}
+
+	public function deleteWritersAction($id)
+	{
+		$this->getConfiguration()->deleteWriter($id);
 		return $this->createJsonResponse(array(), 204);
 	}
 
 
-	/** Accounts */
+	/** Tables */
 
-	public function postAccountAction($accountId)
+	public function getTablesAction($writerId, $id = null)
 	{
-		$this->getComponent()->addAccount($accountId, $this->getPostJson($this->getRequest()));
+		if ($id == null) {
+			return $this->createJsonResponse($this->getConfiguration()->getTables($writerId));
+		}
 
-		return $this->createJsonResponse(array(
-			'status'      => 'ok'
-		));
+		return $this->createJsonResponse($this->getConfiguration()->getTable($writerId, $id));
 	}
 
-
-	/** Rows */
-
-	public function getRowsAction($accountId)
+	public function postTableAction($writerId, $id, Request $request)
 	{
-		return $this->createJsonResponse($this->getComponent()->getRows($accountId));
+		$params = $this->getPostJson($request);
+		$this->checkParams([
+			'dbName',
+			'export'
+		], $params);
+
+		$sysTableId = $this->getConfiguration()->updateTable($writerId, $id, $params);
+
+		return $this->createJsonResponse([
+			'writerId'  => $writerId,
+			'tableId'   => $sysTableId
+		]);
 	}
 
-	public function postRowsAction($accountId)
+	public function postColumnsAction($writerId, $tableId, Request $request)
 	{
-		$this->getComponent()->addRow($accountId, $this->getPostJson($this->getRequest()));
+		$params = $this->getPostJson($request);
 
-		return $this->createJsonResponse(array(
-			'status'      => 'ok'
-		));
-	}
+		if (!is_array($params)) {
+			throw new ParameterMissingException("Payload must be an array of columns");
+		}
 
-	public function deleteRowsAction($accountId, $rowId)
-	{
-		$this->getComponent()->deleteRow($accountId, $rowId);
+		foreach ($params as $param) {
+			$this->checkParams([
+				'name', 'dbName', 'type', 'size', 'null', 'default'
+			], $param);
+		}
 
-		return $this->createJsonResponse(array(), 204);
-	}
+		$sysTableId = $this->getConfiguration()->updateTableColumns($writerId, $tableId, $params);
 
-	/**
-	 * @return DbWriter
-	 */
-	private function getComponent()
-	{
-		return $this->component;
+		return $this->createJsonResponse([
+			'writerId'  => $writerId,
+			'tableId'   => $sysTableId
+		]);
 	}
 }

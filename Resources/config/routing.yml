@@ -1,38 +1,32 @@
+# Writers
+keboola_db_writer_post_writers:
+    path: /writers
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postWriter }
+    methods:  [POST]
 
-# Configs
-keboola_db_writer_get_configs:
-    path: /configs
-    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getConfigs }
+keboola_db_writer_get_writers:
+    path: /writers/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getWriters, id: null }
     methods:  [GET]
 
-keboola_db_writer_post_configs:
-    path: /configs
-    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postConfigs }
-    methods:  [POST]
-
-keboola_db_writer_delete_configs:
-    path: /configs/{id}
-    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteConfig }
+keboola_db_writer_delete_writers:
+    path: /writers/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteWriters }
     methods:  [DELETE]
 
-# Account
-keboola_db_writer_post_account:
-    path: /account/{accountId}
-    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postAccount }
-    methods:  [POST]
-
-# Rows
-keboola_db_writer_get_rows:
-    path: /rows/{accountId}
-    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getRows }
+# Tables
+keboola_db_writer_get_tables:
+    path: /{writerId}/tables/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getTables, id: null }
     methods:  [GET]
 
-keboola_db_writer_post_rows:
-    path: /rows/{accountId}
-    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postRows }
+keboola_db_writer_post_tables:
+    path: /{writerId}/tables/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postTable }
     methods:  [POST]
 
-keboola_db_writer_delete_rows:
-    path: /rows/{accountId}/{rowId}
-    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteRows }
-    methods:  [DELETE]
+# Columns
+keboola_db_writer_post_columns:
+    path: /{writerId}/tables/{tableId}/columns
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postColumns }
+    methods:  [POST]
