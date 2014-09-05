@@ -125,11 +125,7 @@ class Configuration
 
 	public function getCredentials($writerId)
 	{
-		$bucketId = $this->getSysBucketId($writerId);
-		$bucketConfig = $this->readBucketConfig($bucketId);
-		$bucketConfig['db']['password'] = 'password';
-
-		return $bucketConfig['db'];
+		return $this->readBucketConfig($this->getSysBucketId($writerId))['db'];
 	}
 
 	public function getWriters()
