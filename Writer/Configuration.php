@@ -52,6 +52,11 @@ class Configuration
 		return str_replace('.', '_', str_replace('out.', '', $tableId));
 	}
 
+	public function getSysBucket($writerId)
+	{
+		return $this->readBucketConfig($this->getSysBucketId($writerId));
+	}
+
 	protected function readBucketConfig($bucketId)
 	{
 		Reader::$client = $this->storageApi;
@@ -157,9 +162,7 @@ class Configuration
 
 	public function getTables($writerId)
 	{
-		$writerBucket = $this->readBucketConfig($this->getSysBucketId($writerId));
-		$writerTables = $writerBucket['items'];
-
+		$writerTables = $this->getSysTables($writerId);
 		$outTables = $this->getOutTables();
 
 		$tables = [];
@@ -185,6 +188,11 @@ class Configuration
 		//@todo cleanup script
 
 		return $tables;
+	}
+
+	public function getSysTables($writerId)
+	{
+		return $this->readBucketConfig($this->getSysBucketId($writerId))['items'];
 	}
 
 	public function getTable($writerId, $id)

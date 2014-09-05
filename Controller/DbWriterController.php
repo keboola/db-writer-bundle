@@ -13,7 +13,7 @@ class DbWriterController extends ApiController
 	/** @return Configuration */
 	protected function getConfiguration()
 	{
-		return $this->container->get('keboola_db_writer.configuration_factory')->get($this->storageApi);
+		return $this->container->get('wr_db.configuration_factory')->get($this->storageApi);
 	}
 
 	protected function checkParams($required, $params)

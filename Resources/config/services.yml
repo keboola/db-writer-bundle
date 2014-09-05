@@ -1,4 +1,8 @@
 services:
-    keboola_db_writer.configuration_factory:
+    wr_db.configuration_factory:
         class: Keboola\DbWriterBundle\Writer\ConfigurationFactory
         arguments: [%app_name%]
+
+    wr_db.job_executor:
+        class: Keboola\DbWriterBundle\Job\Executor
+        arguments: [@wr_db.configuration_factory, @logger, @syrup.temp]
