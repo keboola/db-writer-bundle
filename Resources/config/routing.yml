@@ -14,6 +14,17 @@ keboola_db_writer_delete_writers:
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteWriters }
     methods:  [DELETE]
 
+# Credentials
+keboola_db_writer_get_credentials:
+    path: /{writerId}/credentials
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getCredentials }
+    methods:  [GET]
+
+keboola_db_writer_post_credentials:
+    path: /{writerId}/credentials
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postCredentials }
+    methods:  [POST]
+
 # Tables
 keboola_db_writer_get_tables:
     path: /{writerId}/tables/{id}

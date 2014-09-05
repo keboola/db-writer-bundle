@@ -97,20 +97,39 @@ class Configuration
 		return $this->storageApi->listTables($this->getSysBucketId($writerId));
 	}
 
-	public function createWriter($name, $connection, $description='')
+	public function createWriter($name, $description='')
 	{
 		$bucketName = $this->componentName .'-' . $name;
 		$bucketId = $this->storageApi->createBucket($bucketName, StorageApi::STAGE_SYS, $description);
 
 		$this->storageApi->setBucketAttribute($bucketId, 'writer', 'db');
 		$this->storageApi->setBucketAttribute($bucketId, 'writerId', $name);
-		foreach ($connection as $k => $v) {
+
+		if (!empty($description)) {
+			$this->storageApi->setBucketAttribute($bucketId, 'description', $description);
+		}
+
+		return $bucketId;
+	}
+
+	public function setCredentials($writerId, $credentials)
+	{
+		$bucketId = $this->getSysBucketId($writerId);
+
+		foreach ($credentials as $k => $v) {
 			if (in_array($k, ['host', 'port', 'database', 'user', 'password'])) {
 				$this->storageApi->setBucketAttribute($bucketId, 'db.' . $k, $v, ($k == 'password'));
 			}
 		}
+	}
 
-		return $bucketId;
+	public function getCredentials($writerId)
+	{
+		$bucketId = $this->getSysBucketId($writerId);
+		$bucketConfig = $this->readBucketConfig($bucketId);
+		$bucketConfig['db']['password'] = 'password';
+
+		return $bucketConfig['db'];
 	}
 
 	public function getWriters()
@@ -124,12 +143,12 @@ class Configuration
 		$res = [];
 		foreach ($writerBuckets as $bucket) {
 			$bucketConfig = $this->readBucketConfig($bucket['id']);
-			$bucketConfig['db']['password'] = 'password';
+//			$bucketConfig['db']['password'] = 'password';
 
 			$res[] = [
 				'id'        => $bucketConfig['writerId'],
 				'bucket'    => $bucket['id'],
-				'connection'    => $bucketConfig['db']
+//				'connection'    => $bucketConfig['db']
 			];
 		}
 
@@ -140,12 +159,12 @@ class Configuration
 	{
 		$bucketId = $this->getSysBucketId($id);
 		$bucketConfig = $this->readBucketConfig($bucketId);
-		$bucketConfig['db']['password'] = 'password';
+//		$bucketConfig['db']['password'] = 'password';
 
 		return [
 			'id'        => $bucketConfig['writerId'],
 			'bucket'    => $bucketId,
-			'connection'    => $bucketConfig['db']
+//			'connection'    => $bucketConfig['db']
 		];
 	}
 

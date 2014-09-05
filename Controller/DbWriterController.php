@@ -31,16 +31,12 @@ class DbWriterController extends ApiController
 	{
 		$params = $this->getPostJson($request);
 		$this->checkParams([
-			'name', 'connection'
+			'name'
 		], $params);
-
-		$this->checkParams([
-			'host', 'database', 'user', 'password'
-		], $params['connection']);
 
 		$description = isset($params['description'])?$params['description']:'DB Writer configuration bucket';
 		$bucketId = $this->getConfiguration()
-			->createWriter($params['name'], $params['connection'], $description);
+			->createWriter($params['name'], $description);
 
 		return $this->createJsonResponse([
 			'writerId'  => $params['name'],
@@ -60,6 +56,28 @@ class DbWriterController extends ApiController
 	{
 		$this->getConfiguration()->deleteWriter($id);
 		return $this->createJsonResponse(array(), 204);
+	}
+
+
+	/** Credentials */
+
+	public function postCredentialsAction($writerId, Request $request)
+	{
+		$params = $this->getPostJson($request);
+		$this->checkParams([
+			'host', 'port', 'database', 'user', 'password'
+		], $params);
+
+		$this->getConfiguration()->setCredentials($writerId, $params);
+
+		return $this->createJsonResponse([
+			'writerId'  => $writerId
+		]);
+	}
+
+	public function getCredentialsAction($writerId)
+	{
+		return $this->createJsonResponse($this->getConfiguration()->getCredentials($writerId));
 	}
 
 
