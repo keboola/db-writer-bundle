@@ -123,7 +123,7 @@ class Writer
 				$default = '';
 			}
 
-			$query .= "`{$col['name']}` $type $null $default";
+			$query .= "`{$col['dbName']}` $type $null $default";
 
 			$query .= ',';
 		}
