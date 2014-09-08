@@ -64,6 +64,8 @@ class Writer
 			$tables = [$tables[$params['table']]];
 		}
 
+		$uploaded = [];
+
 		foreach ($tables as $table) {
 
 			if (!$this->isTableValid($table)) {
@@ -81,10 +83,13 @@ class Writer
 			$this->createDbTable($table);
 
 			$this->loadToDbTable($sourceFilename, $outputTableName);
+
+			$uploaded[] = $sourceTableId;
 		}
 
 		return [
-			'status' => 'ok'
+			'status'    => 'ok',
+			'uploaded'  => $uploaded
 		];
 	}
 

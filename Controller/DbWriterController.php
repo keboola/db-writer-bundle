@@ -2,7 +2,6 @@
 
 namespace Keboola\DbWriterBundle\Controller;
 
-use Keboola\DbWriterBundle\DbWriter;
 use Keboola\DbWriterBundle\Exception\ParameterMissingException;
 use Keboola\DbWriterBundle\Writer\Configuration;
 use Symfony\Component\HttpFoundation\Request;
