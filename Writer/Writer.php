@@ -60,8 +60,13 @@ class Writer
 
 		$this->db = $this->getConnection($writerConfig['db']);
 
-		if (isset($params['table']) && isset($tables[$params['table']])) {
-			$tables = [$tables[$params['table']]];
+		if (isset($params['table'])) {
+			$sysTableName = $this->configuration->getWriterTableName($params['table']);
+			if (isset($tables[$sysTableName])) {
+				$tables = [
+					$tables[$sysTableName]
+				];
+			}
 		}
 
 		$uploaded = [];
