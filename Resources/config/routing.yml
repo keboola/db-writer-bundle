@@ -48,7 +48,7 @@ keboola_db_writer_get_jobs:
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getJobs }
     methods:  [GET]
 
-keboola_db_writer_cancel_job:
-    path: /jobs/{id}/cancel
-    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:cancelJob }
+keboola_db_writer_cancel_waiting_jobs:
+    path: /{writerId}/jobs/cancel
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:cancelWaitingJobs }
     methods:  [POST]

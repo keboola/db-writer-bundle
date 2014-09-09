@@ -155,19 +155,22 @@ class DbWriterController extends ApiController
 		return $this->createJsonResponse($jobs);
 	}
 
-	public function cancelJobAction($jobId)
+	public function cancelWaitingJobsAction($writerId)
 	{
-		$jobManager = $this->getJobManager();
-		$job = $jobManager->getJob($jobId);
+		$sapiData = $this->storageApi->getLogData();
+		$projectId = $sapiData['owner']['id'];
 
-		if ($job->getStatus() == Job::STATUS_WAITING) {
+		$query="(status:waiting)AND(writer:$writerId)";
+
+		$jobManager = $this->getJobManager();
+		$jobs = $jobManager->getJobs($projectId, $this->componentName, null, $query);
+
+		foreach ($jobs as $item) {
+			$job = new Job($item);
 			$job->setStatus(Job::STATUS_CANCELLED);
 			$jobManager->updateJob($job);
 		}
 
-		return $this->createJsonResponse([
-			'jobId'     => $jobId,
-			'status'    => $job->getStatus()
-		]);
+		return $this->createJsonResponse([]);
 	}
 }
