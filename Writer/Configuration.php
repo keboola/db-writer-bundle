@@ -271,11 +271,15 @@ class Configuration
 	{
 		$table = $this->tableFactory->get($writerId, $id);
 
+		$sysTables = $this->getSysTables($writerId);
+		$tableData = $sysTables[$table->getName()]['items'];
+
 		foreach ($data as $k => $v) {
 			$table->setAttribute($k, $v);
 		}
 		$table->setAttribute('tableId', $id);
 		$table->setAttribute('lastChange', date('c'));
+		$table->setFromArray($tableData);
 		$table->save();
 
 		return $table->getId();
