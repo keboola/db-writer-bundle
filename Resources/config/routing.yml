@@ -41,3 +41,14 @@ keboola_db_writer_post_columns:
     path: /{writerId}/tables/{tableId}/columns
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postColumns }
     methods:  [POST]
+
+# Jobs
+keboola_db_writer_get_jobs:
+    path: /{writerId}/jobs
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getJobs }
+    methods:  [GET]
+
+keboola_db_writer_cancel_job:
+    path: /jobs/{id}/cancel
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:cancelJob }
+    methods:  [POST]

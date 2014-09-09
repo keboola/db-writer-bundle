@@ -6,6 +6,8 @@ use Keboola\DbWriterBundle\Exception\ParameterMissingException;
 use Keboola\DbWriterBundle\Writer\Configuration;
 use Symfony\Component\HttpFoundation\Request;
 use Syrup\ComponentBundle\Controller\ApiController;
+use Syrup\ComponentBundle\Job\Metadata\Job;
+use Syrup\ComponentBundle\Job\Metadata\JobManager;
 
 class DbWriterController extends ApiController
 {
@@ -126,6 +128,46 @@ class DbWriterController extends ApiController
 		return $this->createJsonResponse([
 			'writerId'  => $writerId,
 			'tableId'   => $sysTableId
+		]);
+	}
+
+	/** Jobs */
+
+	public function getJobsAction(Request $request)
+	{
+		$params = $request->query->all();
+
+		$runId = isset($params['runId'])?$params['runId']:null;
+		$query = isset($params['q'])?$params['q']:null;
+		$offset = isset($params['offset'])?$params['offset']:0;
+		$limit = isset($params['limit'])?$params['limit']:JobManager::PAGING;
+
+		$sapiData = $this->storageApi->getLogData();
+		$projectId = $sapiData['owner']['id'];
+
+		$jobs = $this->getJobManager()->getJobs($projectId, $this->componentName, $runId, $query, $offset, $limit);
+
+		$jobs = array_map(function ($item) {
+			unset($item['token']['token']);
+			return $item;
+		}, $jobs);
+
+		return $this->createJsonResponse($jobs);
+	}
+
+	public function cancelJobAction($jobId)
+	{
+		$jobManager = $this->getJobManager();
+		$job = $jobManager->getJob($jobId);
+
+		if ($job->getStatus() == Job::STATUS_WAITING) {
+			$job->setStatus(Job::STATUS_CANCELLED);
+			$jobManager->updateJob($job);
+		}
+
+		return $this->createJsonResponse([
+			'jobId'     => $jobId,
+			'status'    => $job->getStatus()
 		]);
 	}
 }
