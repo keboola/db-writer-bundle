@@ -109,7 +109,11 @@ class Configuration
 			$this->storageApi->setBucketAttribute($bucketId, 'description', $description);
 		}
 
-		return $bucketId;
+		return [
+			'id'    => $name,
+			'name'  => $name,
+			'description'   => $description
+		];
 	}
 
 	public function setCredentials($writerId, $credentials)
@@ -139,12 +143,11 @@ class Configuration
 		$res = [];
 		foreach ($writerBuckets as $bucket) {
 			$bucketConfig = $this->readBucketConfig($bucket['id']);
-//			$bucketConfig['db']['password'] = 'password';
 
 			$res[] = [
 				'id'        => $bucketConfig['writerId'],
-				'bucket'    => $bucket['id'],
-//				'connection'    => $bucketConfig['db']
+				'name'      => $bucketConfig['writerId'],
+				'description'   => isset($bucketConfig['description'])?$bucketConfig['description']:''
 			];
 		}
 
@@ -155,12 +158,11 @@ class Configuration
 	{
 		$bucketId = $this->getSysBucketId($id);
 		$bucketConfig = $this->readBucketConfig($bucketId);
-//		$bucketConfig['db']['password'] = 'password';
 
 		return [
 			'id'        => $bucketConfig['writerId'],
-			'bucket'    => $bucketId,
-//			'connection'    => $bucketConfig['db']
+			'name'      => $bucketConfig['writerId'],
+			'description'   => isset($bucketConfig['description'])?$bucketConfig['description']:''
 		];
 	}
 

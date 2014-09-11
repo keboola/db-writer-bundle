@@ -1,16 +1,16 @@
 # Writers
-keboola_db_writer_post_writers:
-    path: /writers
+keboola_db_writer_post_configs:
+    path: /configs
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postWriter }
     methods:  [POST]
 
-keboola_db_writer_get_writers:
-    path: /writers/{id}
+keboola_db_writer_get_configs:
+    path: /configs/{id}
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getWriters, id: null }
     methods:  [GET]
 
 keboola_db_writer_delete_writers:
-    path: /writers/{id}
+    path: /configs/{id}
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteWriters }
     methods:  [DELETE]
 

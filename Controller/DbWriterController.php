@@ -36,13 +36,8 @@ class DbWriterController extends ApiController
 		], $params);
 
 		$description = isset($params['description'])?$params['description']:'DB Writer configuration bucket';
-		$bucketId = $this->getConfiguration()
-			->createWriter($params['name'], $description);
 
-		return $this->createJsonResponse([
-			'writerId'  => $params['name'],
-			'bucketId'  => $bucketId
-		]);
+		return $this->createJsonResponse($this->getConfiguration()->createWriter($params['name'], $description));
 	}
 
 	public function getWritersAction($id = null)
