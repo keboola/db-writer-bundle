@@ -209,7 +209,13 @@ class Configuration
 
 	public function getSysTables($writerId)
 	{
-		return $this->readBucketConfig($this->getSysBucketId($writerId))['items'];
+		$bucketConfig = $this->readBucketConfig($this->getSysBucketId($writerId));
+
+		if (isset($bucketConfig['items'])) {
+			return $bucketConfig['items'];
+		}
+
+		return [];
 	}
 
 	public function getTable($writerId, $id)
