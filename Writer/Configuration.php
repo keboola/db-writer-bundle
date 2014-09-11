@@ -102,6 +102,12 @@ class Configuration
 		$bucketName = $this->componentName .'-' . $name;
 		$bucketId = $this->storageApi->createBucket($bucketName, StorageApi::STAGE_SYS, $description);
 
+		try {
+			$this->storageApi->createBucket($this->componentName, StorageApi::STAGE_SYS, 'Dummy DB Writer config bucket');
+		} catch (\Exception $e) {
+			// bucket exists
+		}
+
 		$this->storageApi->setBucketAttribute($bucketId, 'writer', 'db');
 		$this->storageApi->setBucketAttribute($bucketId, 'writerId', $name);
 
