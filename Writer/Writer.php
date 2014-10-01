@@ -12,6 +12,7 @@ use Doctrine\DBAL\Driver\PDOSqlsrv\Driver;
 use Keboola\DbWriterBundle\Exception\DbException;
 use Keboola\StorageApi\Client as SapiClient;
 use Monolog\Logger;
+use Syrup\ComponentBundle\Exception\UserException;
 use Syrup\ComponentBundle\Filesystem\Temp;
 
 class Writer
@@ -57,6 +58,10 @@ class Writer
 		$writerId = $params['writer'];
 		$writerConfig = $this->configuration->getSysBucket($writerId);
 		$tables = $this->configuration->getSysTables($writerId);
+
+		if (!isset($writerConfig['db'])) {
+			throw new UserException('Missing DB credentials');
+		}
 
 		$this->db = $this->getConnection($writerConfig['db']);
 
