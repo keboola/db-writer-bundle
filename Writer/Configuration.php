@@ -139,7 +139,7 @@ class Configuration
 	{
 		$sysBucketConfig = $this->readBucketConfig($this->getSysBucketId($writerId));
 		if (!isset($sysBucketConfig['db'])) {
-			throw new ConfigurationException('DB credentials not set');
+			return [];
 		}
 		return $sysBucketConfig['db'];
 	}
