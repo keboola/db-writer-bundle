@@ -7,11 +7,13 @@
 
 namespace Keboola\DbWriterBundle\Writer;
 
+use Keboola\DbWriterBundle\Exception\ConfigurationException;
 use Keboola\DbWriterBundle\Model\Table;
 use Keboola\DbWriterBundle\Model\TableFactory;
 use Keboola\StorageApi\Client as StorageApi;
 use Keboola\StorageApi\Config\Reader;
 use Keboola\StorageApi\Exception as StorageApiException;
+use Syrup\ComponentBundle\Exception\UserException;
 
 class Configuration
 {
@@ -135,7 +137,11 @@ class Configuration
 
 	public function getCredentials($writerId)
 	{
-		return $this->readBucketConfig($this->getSysBucketId($writerId))['db'];
+		$sysBucketConfig = $this->readBucketConfig($this->getSysBucketId($writerId));
+		if (!isset($sysBucketConfig['db'])) {
+			throw new ConfigurationException('DB credentials not set');
+		}
+		return $sysBucketConfig['db'];
 	}
 
 	public function getWriters()
@@ -231,11 +237,11 @@ class Configuration
 		$sysBucketId = $this->getSysBucketId($writerId);
 		$tableName = $this->getWriterTableName($id);
 
-		$sysBucketTables = $this->readBucketConfig($sysBucketId)['items'];
+		$bucketConfig = $this->readBucketConfig($sysBucketId);
 
 		$sysTable = null;
-		if (isset($sysBucketTables[$tableName])) {
-			$sysTable = $sysBucketTables[$tableName];
+		if (isset($bucketConfig['items']) && isset($bucketConfig['items'][$tableName])) {
+			$sysTable = $bucketConfig['items'][$tableName];
 		}
 
 		//@todo: check systable attributs
