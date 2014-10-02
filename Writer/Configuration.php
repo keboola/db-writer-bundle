@@ -292,7 +292,11 @@ class Configuration
 		$table = $this->tableFactory->get($writerId, $id);
 
 		$sysTables = $this->getSysTables($writerId);
-		$tableData = $sysTables[$table->getName()]['items'];
+
+		$tableData = [];
+		if (isset($sysTables[$table->getName()])) {
+			$tableData = $sysTables[$table->getName()]['items'];
+		}
 
 		foreach ($data as $k => $v) {
 			$table->setAttribute($k, $v);
