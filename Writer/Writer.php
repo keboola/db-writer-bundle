@@ -55,7 +55,17 @@ class Writer
 
 	public function run($params)
 	{
-		$writerId = $params['writer'];
+		$writerId = null;
+		if (isset($params['config'])) {
+			$writerId = $params['config'];
+		} else if (isset($params['writer'])) {
+			$writerId = $params['writer'];
+		}
+
+		if ($writerId == null) {
+			throw new UserException('Parameter "config" or "writer" must be specified');
+		}
+
 		$writerConfig = $this->configuration->getSysBucket($writerId);
 		$tables = $this->configuration->getSysTables($writerId);
 

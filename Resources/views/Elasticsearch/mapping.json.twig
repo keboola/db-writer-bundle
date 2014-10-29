@@ -1,0 +1,17 @@
+{% extends 'SyrupComponentBundle:Elasticsearch:mappingDefault.json.twig' %}
+
+{% block type_name %}jobs_wr-db{% endblock %}
+
+{% block params %}
+"params": {
+	"dynamic": "strict",
+	"properties": {
+		"writer": {
+			"type": "string"
+		},
+		"table": {
+			"type": "string"
+		}
+	}
+},
+{% endblock %}
