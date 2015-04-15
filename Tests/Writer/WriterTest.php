@@ -23,7 +23,7 @@ class WriterTest extends AbstractTest
         $writer = new Writer(
             $this->configuration,
             $this->container->get('logger'),
-            $this->container->get('temp')
+            $this->container->get('syrup.temp')
         );
 
         $writer->run([
