@@ -194,7 +194,7 @@ class Writer
 			if ($error == '') {
 				$error = trim(file_get_contents($errorFilename));
 			}
-			throw new DbException("SQL export error: " . $error);
+			throw new UserException("SQL export error: " . $error);
 		}
 	}
 
