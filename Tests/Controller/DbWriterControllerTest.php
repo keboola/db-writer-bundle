@@ -198,4 +198,6 @@ class DbWriterControllerTest extends AbstractTest
 
         $this->assertEquals(200, self::$client->getResponse()->getStatusCode());
     }
+
+    /** Jobs */
 }
