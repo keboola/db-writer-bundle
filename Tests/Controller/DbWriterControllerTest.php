@@ -3,6 +3,8 @@
 namespace Keboola\DbWriterBundle\Tests\Controller;
 
 use Keboola\DbWriterBundle\Test\AbstractTest;
+use Keboola\Syrup\Elasticsearch\JobMapper;
+use Keboola\Syrup\Job\Metadata\Job;
 use Symfony\Component\HttpFoundation\Response;
 
 class DbWriterControllerTest extends AbstractTest
@@ -74,9 +76,9 @@ class DbWriterControllerTest extends AbstractTest
 
         self::$client->request(
             'POST', $this->componentName . '/' . $this->writerId . '/credentials',
-            array(),
-            array(),
-            array(),
+            [],
+            [],
+            [],
             json_encode($testing['db'])
         );
 
@@ -133,9 +135,9 @@ class DbWriterControllerTest extends AbstractTest
 
         self::$client->request(
             'POST', $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id'],
-            array(),
-            array(),
-            array(),
+            [],
+            [],
+            [],
             json_encode($testing['table'])
         );
 
@@ -190,9 +192,9 @@ class DbWriterControllerTest extends AbstractTest
         self::$client->request(
             'POST',
             $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id'] . '/columns',
-            array(),
-            array(),
-            array(),
+            [],
+            [],
+            [],
             json_encode($testing['columns'])
         );
 
@@ -200,4 +202,34 @@ class DbWriterControllerTest extends AbstractTest
     }
 
     /** Jobs */
+    public function testGetJobsAction()
+    {
+        $this->createWriter();
+        $testing = $this->container->getParameter('testing');
+        $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
+
+        /** @var JobMapper $jobMapper */
+        $jobMapper = $this->container->get('syrup.elasticsearch.current_component_job_mapper');
+        $jobMapper->create($this->createJob('run', ['config' => 'test']));
+
+        sleep(2);
+
+        self::$client->request(
+            'GET',
+            $this->componentName . '/' . $this->writerId . '/jobs'
+        );
+
+        $responseJson = self::$client->getResponse()->getContent();
+        $response = json_decode($responseJson, true);
+
+        $this->assertNotEmpty($response);
+        $this->assertEquals(200, self::$client->getResponse()->getStatusCode());
+    }
+
+    protected function createJob($command, $params)
+    {
+        $jobFactory = $this->container->get('syrup.job_factory');
+        $jobFactory->setStorageApiClient($this->storageApi);
+        return $jobFactory->create($command, $params);
+    }
 }

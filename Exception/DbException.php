@@ -7,12 +7,12 @@
 
 namespace Keboola\DbWriterBundle\Exception;
 
-use Keboola\Syrup\Exception\SyrupComponentException;
+use Keboola\Syrup\Exception\UserException;
 
-class DbException extends SyrupComponentException
+class DbException extends UserException
 {
-	public function __construct($message = null, \Exception $previous = null, array $headers = array(), $code = 0)
+	public function __construct($message = null, \Exception $previous = null, $data)
 	{
-		parent::__construct(400, $message, $previous, $headers, $code);
+		parent::__construct($message, $previous, $data);
 	}
 }
