@@ -49,7 +49,7 @@ class DbWriterControllerTest extends AbstractTest
         $this->assertEquals('test', $response['name']);
     }
 
-    public function testDeleteConfig()
+    public function testDeleteWritersAction()
     {
         $this->createWriter();
 
@@ -62,5 +62,140 @@ class DbWriterControllerTest extends AbstractTest
 
         $this->assertEquals(204, $response->getStatusCode());
         $this->assertEmpty($writers);
+    }
+
+    /** Credentials */
+
+    public function testPostCredentialsAction()
+    {
+        $this->createWriter();
+
+        $testing = $this->container->getParameter('testing');
+
+        self::$client->request(
+            'POST', $this->componentName . '/' . $this->writerId . '/credentials',
+            array(),
+            array(),
+            array(),
+            json_encode($testing['db'])
+        );
+
+        $responseJson = self::$client->getResponse()->getContent();
+        $response = json_decode($responseJson, true);
+
+        $this->assertEquals($this->writerId, $response['writerId']);
+
+        $credentials = $this->configuration->getCredentials($this->writerId);
+
+        $this->assertArrayHasKey('host', $credentials);
+        $this->assertArrayHasKey('port', $credentials);
+        $this->assertArrayHasKey('database', $credentials);
+        $this->assertArrayHasKey('user', $credentials);
+        $this->assertArrayHasKey('password', $credentials);
+
+        $this->assertNotEmpty($credentials['host']);
+        $this->assertNotEmpty($credentials['port']);
+        $this->assertNotEmpty($credentials['database']);
+        $this->assertNotEmpty($credentials['user']);
+        $this->assertNotEmpty($credentials['password']);
+    }
+
+    public function testGetCredentialsAction()
+    {
+        $this->createWriter();
+        $testing = $this->container->getParameter('testing');
+        $this->configuration->setCredentials($this->writerId, $testing['db']);
+
+        self::$client->request('GET', $this->componentName . '/' . $this->writerId . '/credentials');
+
+        $responseJson = self::$client->getResponse()->getContent();
+        $credentials = json_decode($responseJson, true);
+
+        $this->assertArrayHasKey('host', $credentials);
+        $this->assertArrayHasKey('port', $credentials);
+        $this->assertArrayHasKey('database', $credentials);
+        $this->assertArrayHasKey('user', $credentials);
+        $this->assertArrayHasKey('password', $credentials);
+
+        $this->assertNotEmpty($credentials['host']);
+        $this->assertNotEmpty($credentials['port']);
+        $this->assertNotEmpty($credentials['database']);
+        $this->assertNotEmpty($credentials['user']);
+        $this->assertNotEmpty($credentials['password']);
+    }
+
+    /** Tables */
+
+    public function testPostTableAction()
+    {
+        $this->createWriter();
+        $testing = $this->container->getParameter('testing');
+
+        self::$client->request(
+            'POST', $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id'],
+            array(),
+            array(),
+            array(),
+            json_encode($testing['table'])
+        );
+
+        $responseJson = self::$client->getResponse()->getContent();
+        $response = json_decode($responseJson, true);
+
+        $this->assertEquals($this->writerId, $response['writerId']);
+
+        $sysBucketId = $this->configuration->getSysBucketId($this->writerId);
+        $tableId = $sysBucketId . '.' . str_replace('.', '_', $testing['table']['id']);
+
+        $this->assertEquals($tableId, $response['tableId']);
+    }
+
+    public function testGetTablesAction()
+    {
+        $this->createWriter();
+        $testing = $this->container->getParameter('testing');
+        $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
+
+        self::$client->request(
+            'GET',
+            $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id']
+        );
+
+        $responseJson = self::$client->getResponse()->getContent();
+        $response = json_decode($responseJson, true);
+
+        $this->assertEquals($testing['table']['id'], $response['id']);
+        $this->assertEquals($testing['table']['dbName'], $response['name']);
+        $this->assertEquals($testing['table']['export'], $response['export']);
+        $this->assertNotEmpty($response['lastChange']);
+        $this->assertNotEmpty($response['columns']);
+
+
+        foreach ($response['columns'] as $col) {
+            $this->assertNotEmpty($col['name']);
+            $this->assertNotEmpty($col['dbName']);
+            $this->assertNotEmpty($col['type']);
+            $this->assertEquals('IGNORE', $col['type']);
+        }
+    }
+
+    /** Columns */
+
+    public function testPostColumnsAction()
+    {
+        $this->createWriter();
+        $testing = $this->container->getParameter('testing');
+        $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
+
+        self::$client->request(
+            'POST',
+            $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id'] . '/columns',
+            array(),
+            array(),
+            array(),
+            json_encode($testing['columns'])
+        );
+
+        $this->assertEquals(200, self::$client->getResponse()->getStatusCode());
     }
 }

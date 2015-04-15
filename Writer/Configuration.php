@@ -242,7 +242,8 @@ class Configuration
 		$columns = [];
 		foreach ($outTable['columns'] as $col) {
 
-			if (isset($sysTable['items'])
+			if (
+                isset($sysTable['items'])
 				&& !empty($sysTable['items'])
 				&& (($configColumn = $this->getColumnFromConfig($sysTable['items'], $col)) != null )
 			) {

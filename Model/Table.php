@@ -49,4 +49,19 @@ class Table extends StorageApiTable
 		}
 		return null;
 	}
+
+    public static function supportedTypes()
+    {
+        return [
+            'IGONRE',
+            'VARCHAR',
+            'TEXT',
+            'DECIMAL',
+            'INT',
+            'BIGINT',
+            'TIMESTAMP',
+            'DATE',
+            'DATETIME'
+        ];
+    }
 }

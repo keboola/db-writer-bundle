@@ -56,11 +56,13 @@ class AbstractTest extends WebTestCase
 
         // Cleanup
         $sysBucketId = $this->configuration->getSysBucketId($this->writerId);
-        $accTables = $this->storageApi->listTables($sysBucketId);
-        foreach ($accTables as $table) {
-            $this->storageApi->dropTable($table['id']);
+        if ($this->storageApi->bucketExists($sysBucketId)) {
+            $accTables = $this->storageApi->listTables($sysBucketId);
+            foreach ($accTables as $table) {
+                $this->storageApi->dropTable($table['id']);
+            }
+            $this->storageApi->dropBucket($sysBucketId);
         }
-        $this->storageApi->dropBucket($sysBucketId);
     }
 
     protected function createWriter()
