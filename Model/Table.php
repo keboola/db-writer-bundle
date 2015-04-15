@@ -8,7 +8,6 @@
 namespace Keboola\DbWriterBundle\Model;
 
 use Keboola\DbWriterBundle\Writer\Configuration;
-use Keboola\StorageApi\Client as StorageApi;
 use Keboola\StorageApi\Table as StorageApiTable;
 
 class Table extends StorageApiTable

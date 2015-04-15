@@ -7,13 +7,12 @@
 
 namespace Keboola\DbWriterBundle\Job;
 
-use Keboola\DbWriterBundle\Writer\Configuration;
 use Keboola\DbWriterBundle\Writer\ConfigurationFactory;
 use Keboola\DbWriterBundle\Writer\Writer;
+use Keboola\Temp\Temp;
 use Monolog\Logger;
-use Syrup\ComponentBundle\Filesystem\Temp;
-use Syrup\ComponentBundle\Job\Executor as BaseExecutor;
-use Syrup\ComponentBundle\Job\Metadata\Job;
+use Keboola\Syrup\Job\Executor as BaseExecutor;
+use Keboola\Syrup\Job\Metadata\Job;
 
 class Executor extends BaseExecutor
 {

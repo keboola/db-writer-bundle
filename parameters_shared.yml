@@ -1,0 +1,46 @@
+parameters:
+    database_driver: pdo_mysql
+    database_host: localhost
+    database_port: null
+    database_name: syrup
+    database_user: syrup
+    database_password: skaChUbslczYi6ZqrfJxvcX6
+    pdo.db_options:
+        db_table: session
+        db_id_col: id
+        db_data_col: value
+        db_time_col: time
+    locks_db.driver: pdo_mysql
+    locks_db.host: localhost
+    locks_db.port: null
+    locks_db.name: syrup
+    locks_db.user: syrup
+    locks_db.password: skaChUbslczYi6ZqrfJxvcX6
+    mailer_transport: smtp
+    mailer_host: localhost
+    mailer_user: null
+    mailer_password: null
+    locale: en
+    secret: thisIsSecretHashBleeWieasalsfhlaf
+    kernel.trusted_hosts: null
+    storage_api.test.token: 395-11022-eb2f88cd6f6faadc1af62debb383727ab175d41f
+    storage_api.test.url: 'https://connection.keboola.com'
+    storage_api.url: 'https://connection.keboola.com/'
+    shared_sapi:
+        url: 'https://connection.keboola.com'
+        token: 288-10762-4ede0216078613519338b4eb011e0ccbd8d9bf9c
+    uploader:
+        aws-access-key: AKIAJMFLGHTG2BI3WNEQ
+        aws-secret-key: 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
+        s3-upload-path: keboola-logs/debug-files
+        bitly-login: petrsimecek
+        bitly-api-key: R_35ed95e18188c58f7b42787f358857ea
+    queue:
+        url:      http://syrup-components.kbc-devel-02.keboola.com
+        db_table: queues
+
+    elasticsearch:
+        hosts: [vpc-elb-elasticsearch-syrup-test-651343387.us-east-1.elb.amazonaws.com:9200]
+
+    job_manager:
+        index_prefix: devel

@@ -7,7 +7,6 @@
 
 namespace Keboola\DbWriterBundle\Model;
 
-
 use Keboola\DbWriterBundle\Writer\Configuration;
 
 class TableFactory

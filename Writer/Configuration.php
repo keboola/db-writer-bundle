@@ -7,13 +7,9 @@
 
 namespace Keboola\DbWriterBundle\Writer;
 
-use Keboola\DbWriterBundle\Exception\ConfigurationException;
-use Keboola\DbWriterBundle\Model\Table;
 use Keboola\DbWriterBundle\Model\TableFactory;
 use Keboola\StorageApi\Client as StorageApi;
 use Keboola\StorageApi\Config\Reader;
-use Keboola\StorageApi\Exception as StorageApiException;
-use Syrup\ComponentBundle\Exception\UserException;
 
 class Configuration
 {
@@ -102,13 +98,10 @@ class Configuration
 	public function createWriter($name, $description='')
 	{
 		$bucketName = $this->componentName .'-' . $name;
-		$bucketId = $this->storageApi->createBucket($bucketName, StorageApi::STAGE_SYS, $description);
-
-		try {
-			$this->storageApi->createBucket($this->componentName, StorageApi::STAGE_SYS, 'Dummy DB Writer config bucket');
-		} catch (\Exception $e) {
-			// bucket exists
-		}
+        $bucketId = 'sys.c-' . $bucketName;
+        if (!$this->storageApi->bucketExists($bucketId)) {
+            $this->storageApi->createBucket($bucketName, StorageApi::STAGE_SYS, $description);
+        }
 
 		$this->storageApi->setBucketAttribute($bucketId, 'writer', 'db');
 		$this->storageApi->setBucketAttribute($bucketId, 'writerId', $name);
@@ -118,9 +111,9 @@ class Configuration
 		}
 
 		return [
-			'id'    => $name,
-			'name'  => $name,
-			'description'   => $description
+			'id' => $name,
+			'name' => $name,
+			'description' => $description
 		];
 	}
 

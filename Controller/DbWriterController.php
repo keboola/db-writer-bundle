@@ -4,10 +4,12 @@ namespace Keboola\DbWriterBundle\Controller;
 
 use Keboola\DbWriterBundle\Exception\ParameterMissingException;
 use Keboola\DbWriterBundle\Writer\Configuration;
+use Keboola\Syrup\Elasticsearch\JobMapper;
+use Keboola\Syrup\Elasticsearch\Search;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Syrup\ComponentBundle\Controller\ApiController;
-use Syrup\ComponentBundle\Job\Metadata\Job;
-use Syrup\ComponentBundle\Job\Metadata\JobManager;
+use Keboola\Syrup\Controller\ApiController;
+use Keboola\Syrup\Job\Metadata\Job;
 
 class DbWriterController extends ApiController
 {
@@ -17,6 +19,10 @@ class DbWriterController extends ApiController
 		return $this->container->get('wr_db.configuration_factory')->get($this->storageApi);
 	}
 
+    /**
+     * @param $required
+     * @param $params
+     */
 	protected function checkParams($required, $params)
 	{
 		foreach ($required as $r) {
@@ -26,8 +32,28 @@ class DbWriterController extends ApiController
 		}
 	}
 
+    /**
+     * @return JobMapper
+     */
+    protected function getJobMapper()
+    {
+        return $this->container->get('syrup.elasticsearch.current_component_job_mapper');
+    }
+
+    /**
+     * @return Search
+     */
+    protected function getElasticSearch()
+    {
+        return $this->container->get('syrup.elasticsearch.search');
+    }
+
 	/** Writers */
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
 	public function postWriterAction(Request $request)
 	{
 		$params = $this->getPostJson($request);
@@ -37,9 +63,15 @@ class DbWriterController extends ApiController
 
 		$description = isset($params['description'])?$params['description']:'DB Writer configuration bucket';
 
-		return $this->createJsonResponse($this->getConfiguration()->createWriter($params['name'], $description));
+		return $this->createJsonResponse(
+            $this->getConfiguration()->createWriter($params['name'], $description)
+        );
 	}
 
+    /**
+     * @param null $id
+     * @return JsonResponse
+     */
 	public function getWritersAction($id = null)
 	{
 		if ($id != null) {
@@ -48,15 +80,24 @@ class DbWriterController extends ApiController
 		return $this->createJsonResponse($this->getConfiguration()->getWriters());
 	}
 
+    /**
+     * @param $id
+     * @return JsonResponse
+     */
 	public function deleteWritersAction($id)
 	{
 		$this->getConfiguration()->deleteWriter($id);
-		return $this->createJsonResponse(array(), 204);
+		return $this->createJsonResponse([], 204);
 	}
 
 
 	/** Credentials */
 
+    /**
+     * @param         $writerId
+     * @param Request $request
+     * @return JsonResponse
+     */
 	public function postCredentialsAction($writerId, Request $request)
 	{
 		$params = $this->getPostJson($request);
@@ -71,6 +112,10 @@ class DbWriterController extends ApiController
 		]);
 	}
 
+    /**
+     * @param $writerId
+     * @return JsonResponse
+     */
 	public function getCredentialsAction($writerId)
 	{
 		return $this->createJsonResponse($this->getConfiguration()->getCredentials($writerId));
@@ -79,6 +124,11 @@ class DbWriterController extends ApiController
 
 	/** Tables */
 
+    /**
+     * @param      $writerId
+     * @param null $id
+     * @return JsonResponse
+     */
 	public function getTablesAction($writerId, $id = null)
 	{
 		if ($id == null) {
@@ -88,6 +138,12 @@ class DbWriterController extends ApiController
 		return $this->createJsonResponse($this->getConfiguration()->getTable($writerId, $id));
 	}
 
+    /**
+     * @param         $writerId
+     * @param         $id
+     * @param Request $request
+     * @return JsonResponse
+     */
 	public function postTableAction($writerId, $id, Request $request)
 	{
 		$params = $this->getPostJson($request);
@@ -104,6 +160,12 @@ class DbWriterController extends ApiController
 		]);
 	}
 
+    /**
+     * @param         $writerId
+     * @param         $tableId
+     * @param Request $request
+     * @return JsonResponse
+     */
 	public function postColumnsAction($writerId, $tableId, Request $request)
 	{
 		$params = $this->getPostJson($request);
@@ -128,6 +190,10 @@ class DbWriterController extends ApiController
 
 	/** Jobs */
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
 	public function getJobsAction(Request $request)
 	{
 		$params = $request->query->all();
@@ -135,12 +201,19 @@ class DbWriterController extends ApiController
 		$runId = isset($params['runId'])?$params['runId']:null;
 		$query = isset($params['q'])?$params['q']:null;
 		$offset = isset($params['offset'])?$params['offset']:0;
-		$limit = isset($params['limit'])?$params['limit']:JobManager::PAGING;
+		$limit = isset($params['limit'])?$params['limit']:100;
 
 		$sapiData = $this->storageApi->getLogData();
 		$projectId = $sapiData['owner']['id'];
 
-		$jobs = $this->getJobManager()->getJobs($projectId, $this->componentName, $runId, $query, $offset, $limit);
+		$jobs = $this->getElasticSearch()->getJobs([
+            'component' => $this->componentName,
+            'runId' => $runId,
+            'query' => $query,
+            'projectId' => $projectId,
+            'offset' => $offset,
+            'limit' => $limit
+        ]);
 
 		$jobs = array_map(function ($item) {
 			unset($item['token']['token']);
@@ -150,6 +223,10 @@ class DbWriterController extends ApiController
 		return $this->createJsonResponse($jobs);
 	}
 
+    /**
+     * @param $writerId
+     * @return JsonResponse
+     */
 	public function cancelWaitingJobsAction($writerId)
 	{
 		$sapiData = $this->storageApi->getLogData();
@@ -157,13 +234,17 @@ class DbWriterController extends ApiController
 
 		$query="(status:waiting)AND(writer:$writerId)";
 
-		$jobManager = $this->getJobManager();
-		$jobs = $jobManager->getJobs($projectId, $this->componentName, null, $query);
+		$jobs = $this->getElasticSearch()->getJobs([
+            'projectId' => $projectId,
+            'component' => $this->componentName,
+            'query' => $query
+        ]);
 
+        $jobMapper = $this->getJobMapper();
 		foreach ($jobs as $item) {
 			$job = new Job($item);
 			$job->setStatus(Job::STATUS_CANCELLED);
-			$jobManager->updateJob($job);
+            $jobMapper->update($job);
 		}
 
 		return $this->createJsonResponse([]);

@@ -8,8 +8,7 @@
 
 namespace Keboola\DbWriterBundle\Exception;
 
-
-use Syrup\ComponentBundle\Exception\SyrupComponentException;
+use Keboola\Syrup\Exception\SyrupComponentException;
 
 class ParameterMissingException extends SyrupComponentException
 {
@@ -17,5 +16,4 @@ class ParameterMissingException extends SyrupComponentException
 	{
 		parent::__construct(400, $message);
 	}
-
 }

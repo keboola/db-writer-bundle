@@ -11,9 +11,9 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDOSqlsrv\Driver;
 use Keboola\DbWriterBundle\Exception\DbException;
 use Keboola\StorageApi\Client as SapiClient;
+use Keboola\Temp\Temp;
 use Monolog\Logger;
-use Syrup\ComponentBundle\Exception\UserException;
-use Syrup\ComponentBundle\Filesystem\Temp;
+use Keboola\Syrup\Exception\UserException;
 
 class Writer
 {
@@ -175,8 +175,6 @@ class Writer
 
 	protected function runSql($query)
 	{
-		var_dump($query);
-
 		$errorFilename = $this->getErrorFilename();
 
 		$dbConfig = $this->db->getParams();
