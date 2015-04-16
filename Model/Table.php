@@ -53,7 +53,7 @@ class Table extends StorageApiTable
     public static function supportedTypes()
     {
         return [
-            'IGONRE',
+            'IGNORE',
             'VARCHAR',
             'TEXT',
             'DECIMAL',
