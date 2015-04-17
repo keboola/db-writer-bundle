@@ -95,8 +95,17 @@ class Writer
 			$sourceTableId = $table['tableId'];
 			$outputTableName = $table['dbName'];
 
+            $colNames = [];
+            foreach ($table['items'] as $item) {
+                if ($item['type'] != 'IGNORE') {
+                    $colNames[] = $item['name'];
+                }
+            }
+
 			$sourceFilename = $this->temp->createTmpFile(null, true);
-			$this->storageApi->exportTable($sourceTableId, $sourceFilename);
+			$this->storageApi->exportTable($sourceTableId, $sourceFilename, [
+                'columns' => $colNames
+            ]);
 
 			$this->dropDbTable($outputTableName);
 
@@ -163,9 +172,9 @@ class Writer
 		$query = "LOAD DATA LOCAL INFILE '{$sourceFilename}'"
 			. " REPLACE INTO TABLE `{$outputTableName}`"
 			. " COLUMNS TERMINATED BY ','"
-			. " OPTIONALLY ENCLOSED BY '".$fieldDelimiter."'"
+			. " OPTIONALLY ENCLOSED BY '" . $fieldDelimiter . "'"
 			. " ESCAPED BY ''"
-			. " LINES TERMINATED BY '".$lineDelimiter."'"
+			. " LINES TERMINATED BY '" . $lineDelimiter . "'"
 			. " IGNORE 1 LINES"
 			. ";"
 		;
