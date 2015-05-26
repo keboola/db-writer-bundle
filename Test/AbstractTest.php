@@ -67,7 +67,7 @@ class AbstractTest extends WebTestCase
 
     protected function createWriter()
     {
-        $this->configuration->createWriter($this->writerId, 'Test Account created by PhpUnit');
+        return $this->configuration->createWriter($this->writerId, 'Test Account created by PhpUnit');
     }
 
     protected function createCredentials($params)

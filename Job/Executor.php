@@ -9,6 +9,9 @@ namespace Keboola\DbWriterBundle\Job;
 
 use Keboola\DbWriterBundle\Writer\ConfigurationFactory;
 use Keboola\DbWriterBundle\Writer\Writer;
+use Keboola\DbWriterBundle\Writer\WriterFactory;
+use Keboola\DbWriterBundle\Writer\WriterInterface;
+use Keboola\Syrup\Exception\UserException;
 use Keboola\Temp\Temp;
 use Monolog\Logger;
 use Keboola\Syrup\Job\Executor as BaseExecutor;
@@ -25,17 +28,82 @@ class Executor extends BaseExecutor
 	/** @var Temp */
 	protected $temp;
 
-	public function __construct(ConfigurationFactory $configurationFactory, Logger $logger, Temp $temp)
+	public function __construct(ConfigurationFactory $configurationFactory, WriterFactory $writerFactory, Logger $logger, Temp $temp)
 	{
 		$this->configurationFactory = $configurationFactory;
 		$this->logger = $logger;
 		$this->temp = $temp;
+        $this->writerFactory = $writerFactory;
 	}
 
 	public function execute(Job $job)
 	{
-		$configuration = $this->configurationFactory->get($this->storageApi);
-		$writer = new Writer($configuration, $this->logger, $this->temp);
-		return $writer->run($job->getParams());
+        $options = $job->getParams();
+
+        $writerId = null;
+        if (isset($options['config'])) {
+            $writerId = $options['config'];
+        } else if (isset($options['writer'])) {
+            $writerId = $options['writer'];
+        }
+
+        if ($writerId == null) {
+            throw new UserException('Parameter "config" or "writer" must be specified');
+        }
+
+        $configuration = $this->configurationFactory->get($this->storageApi);
+        $writerConfig = $configuration->getSysBucket($writerId);
+        $tables = $configuration->getSysTables($writerId);
+
+        if (!isset($writerConfig['db'])) {
+            throw new UserException('Missing DB credentials');
+        }
+
+        /** @var WriterInterface $writer */
+		$writer = $this->writerFactory->get($writerConfig['db']);
+
+        if (isset($params['table'])) {
+            $sysTableName = $configuration->getWriterTableName($params['table']);
+            if (isset($tables[$sysTableName])) {
+                $tables = [
+                    $tables[$sysTableName]
+                ];
+            }
+        }
+
+        $uploaded = [];
+        foreach ($tables as $table) {
+
+            if (!$writer->isTableValid($table)) {
+                //@todo: create warning event in SAPI
+                continue;
+            }
+
+            $sourceTableId = $table['tableId'];
+            $outputTableName = $table['dbName'];
+
+            $colNames = [];
+            foreach ($table['items'] as $item) {
+                if ($item['type'] != 'IGNORE') {
+                    $colNames[] = $item['name'];
+                }
+            }
+
+            $sourceFilename = $this->temp->createTmpFile(null, true);
+            $this->storageApi->exportTable($sourceTableId, $sourceFilename, [
+                'columns' => $colNames
+            ]);
+
+            $writer->drop($outputTableName);
+            $writer->create($table);
+            $writer->write($sourceFilename, $outputTableName);
+
+            $uploaded[] = $sourceTableId;
+        }
+
+        return [
+            'status'    => 'ok',
+            'uploaded'  => $uploaded
+        ];
 	}
 }
