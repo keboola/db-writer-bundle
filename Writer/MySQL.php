@@ -12,6 +12,9 @@ use Keboola\Syrup\Exception\UserException;
 
 class MySQL extends Writer implements WriterInterface
 {
+    /** @var \PDO */
+    protected $db;
+
     public function createConnection($dbParams)
     {
         // convert errors to PDOExceptions
@@ -28,20 +31,6 @@ class MySQL extends Writer implements WriterInterface
 
         $port = isset($dbParams['port']) ? $dbParams['port'] : '3306';
         $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8", $dbParams['host'], $port, $dbParams['database']);
-
-        // SSL support
-        if (isset($dbParams['ssl'])) {
-
-            if (isset($dbParams['ssl']['key'])) {
-                $options[\PDO::MYSQL_ATTR_SSL_KEY] = $this->createSSLFile($dbParams['ssl']['key']);
-            }
-            if (isset($dbParams['ssl']['cert'])) {
-                $options[\PDO::MYSQL_ATTR_SSL_CERT] = $this->createSSLFile($dbParams['ssl']['cert']);
-            }
-            if (isset($dbParams['ssl']['ca'])) {
-                $options[\PDO::MYSQL_ATTR_SSL_CA] = $this->createSSLFile($dbParams['ssl']['ca']);
-            }
-        }
 
         $this->logger->info("Connecting to DSN '" . $dsn . "'...", [
             'options' => $options

@@ -29,6 +29,8 @@ class WriterFactory
 
     public function get($dbParams)
     {
+        var_dump($dbParams);
+
         if (!isset($dbParams['driver'])) {
             $dbParams['driver'] = 'mysql';
         }

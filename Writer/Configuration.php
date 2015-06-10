@@ -122,7 +122,7 @@ class Configuration
 		$bucketId = $this->getSysBucketId($writerId);
 
 		foreach ($credentials as $k => $v) {
-			if (in_array($k, ['host', 'port', 'database', 'user', 'password'])) {
+			if (in_array($k, ['driver', 'host', 'port', 'database', 'user', 'password'])) {
 				$this->storageApi->setBucketAttribute($bucketId, 'db.' . $k, $v, ($k == 'password'));
 			}
 		}

@@ -27,7 +27,6 @@ abstract class Writer implements WriterInterface
 	/** @var SapiClient */
 	protected $storageApi;
 
-    /** @var \PDO */
 	protected $db;
 
 	public function __construct($dbParams, Logger $logger)
