@@ -28,9 +28,6 @@ class Oracle extends Writer implements WriterInterface
         $csv->next();
 
         while ($csv->current() != null) {
-
-            $sql = "";
-
             for ($i=0; $i<1000 && $csv->current() != null; $i++) {
 
                 $cols = [];
@@ -40,19 +37,16 @@ class Oracle extends Writer implements WriterInterface
 
                 $sql = sprintf("INSERT INTO {$outputTableName} (%s) VALUES (%s)", implode(',', $header), implode(',', $cols));
 
-                $stmt = oci_parse($this->db, $sql);
-                oci_execute($stmt);
+                try {
+                    $stmt = oci_parse($this->db, $sql);
+                    oci_execute($stmt);
+                } catch (\Exception $e) {
+                    throw new UserException("Query failed: " . $e->getMessage(), $e, [
+                        'query' => $sql
+                    ]);
+                }
 
                 $csv->next();
-            }
-
-            try {
-                $stmt = oci_parse($this->db, $sql);
-                oci_execute($stmt);
-            } catch (\Exception $e) {
-                throw new UserException("Query failed: " . $e->getMessage(), $e, [
-                    'query' => $sql
-                ]);
             }
         }
     }

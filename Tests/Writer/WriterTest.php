@@ -9,6 +9,7 @@ namespace Keboola\DbWriterBundle\Tests\Writer;
 
 use Keboola\DbWriterBundle\Job\Executor;
 use Keboola\DbWriterBundle\Test\AbstractTest;
+use Keboola\StorageApi\Table;
 use Keboola\Syrup\Encryption\Encryptor;
 use Keboola\Syrup\Job\Metadata\Job;
 
@@ -27,18 +28,37 @@ class WriterTest extends AbstractTest
         $this->configuration->updateTable($this->writerId, $testing['table']['id'], [
             'dbName' => 'keboola.dummy'
         ]);
-        $this->write($writerData['id']);
 
         $dbParams = $testing['oracle']['db'];
         $dbString = '//' . $dbParams['host'] . ':' . $dbParams['port'] . '/' . $dbParams['database'];
         $conn = oci_connect($dbParams['user'], $dbParams['password'], $dbString, 'AL32UTF8');
 
+        try {
+            oci_execute("DROP TABLE keboola.dummy");
+        } catch (\Exception $e) {
+            // table doesn't exist
+        }
+
+        $this->write($writerData['id']);
+
         $stid = oci_parse($conn, "SELECT * FROM keboola.dummy");
         oci_execute($stid);
 
-        while ($res = oci_fetch_array($stid)) {
-            var_dump($res);
+        $result = [];
+        while ($res = oci_fetch_assoc($stid)) {
+            $result[] = array_values($res);
         }
+
+        $sapiData = $this->storageApi->exportTable($testing['table']['id']);
+        $sapiDataArr = Table::csvStringToArray($sapiData);
+        $sapiDataArrFinal = [];
+        unset($sapiDataArr[0]);
+        foreach ($sapiDataArr as $row) {
+            unset($row[3]);
+            $sapiDataArrFinal[] = array_values($row);
+        }
+
+        $this->assertEquals($sapiDataArrFinal, $result);
     }
 
     protected function prepareConfig($driver)
