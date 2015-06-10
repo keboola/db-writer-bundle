@@ -79,7 +79,7 @@ class DbWriterControllerTest extends AbstractTest
             [],
             [],
             [],
-            json_encode($testing['db'])
+            json_encode($testing['mysql']['db'])
         );
 
         $responseJson = self::$client->getResponse()->getContent();
@@ -106,7 +106,7 @@ class DbWriterControllerTest extends AbstractTest
     {
         $this->createWriter();
         $testing = $this->container->getParameter('testing');
-        $this->configuration->setCredentials($this->writerId, $testing['db']);
+        $this->configuration->setCredentials($this->writerId, $testing['mysql']['db']);
 
         self::$client->request('GET', $this->componentName . '/' . $this->writerId . '/credentials');
 

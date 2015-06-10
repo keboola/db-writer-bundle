@@ -33,6 +33,8 @@ class WriterTest extends AbstractTest
         $dbString = '//' . $dbParams['host'] . ':' . $dbParams['port'] . '/' . $dbParams['database'];
         $conn = oci_connect($dbParams['user'], $dbParams['password'], $dbString, 'AL32UTF8');
 
+
+
         try {
             oci_execute("DROP TABLE keboola.dummy");
         } catch (\Exception $e) {

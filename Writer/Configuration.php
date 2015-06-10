@@ -121,6 +121,10 @@ class Configuration
 	{
 		$bucketId = $this->getSysBucketId($writerId);
 
+        if (!isset($credentials['driver']) || empty($credentials['driver'])) {
+            $credentials['driver'] = 'mysql';
+        }
+
 		foreach ($credentials as $k => $v) {
 			if (in_array($k, ['driver', 'host', 'port', 'database', 'user', 'password'])) {
 				$this->storageApi->setBucketAttribute($bucketId, 'db.' . $k, $v, ($k == 'password'));
