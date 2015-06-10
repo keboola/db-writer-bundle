@@ -101,9 +101,6 @@ class MySQL extends Writer implements WriterInterface
             try {
                 $stmt = $this->db->prepare($sql);
                 $result = $stmt->execute($data);
-
-                echo "result " . $result . PHP_EOL;
-
             } catch (\PDOException $e) {
                 throw new UserException("Query failed: " . $e->getMessage(), $e, [
                     'query' => $sql
