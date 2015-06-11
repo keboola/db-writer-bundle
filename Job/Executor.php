@@ -11,6 +11,7 @@ use Keboola\DbWriterBundle\Writer\ConfigurationFactory;
 use Keboola\DbWriterBundle\Writer\Writer;
 use Keboola\DbWriterBundle\Writer\WriterFactory;
 use Keboola\DbWriterBundle\Writer\WriterInterface;
+use Keboola\StorageApi\ClientException;
 use Keboola\Syrup\Exception\UserException;
 use Keboola\Temp\Temp;
 use Monolog\Logger;
@@ -90,9 +91,16 @@ class Executor extends BaseExecutor
             }
 
             $sourceFilename = $this->temp->createTmpFile(null, true);
-            $this->storageApi->exportTable($sourceTableId, $sourceFilename, [
-                'columns' => $colNames
-            ]);
+
+            try {
+                $this->storageApi->exportTable($sourceTableId, $sourceFilename, [
+                    'columns' => $colNames
+                ]);
+            } catch (ClientException $e) {
+                throw new UserException("Error exporting table from StorageAPI", $e, [
+                    'message' => $e->getMessage()
+                ]);
+            }
 
             $writer->drop($outputTableName);
             $writer->create($table);
