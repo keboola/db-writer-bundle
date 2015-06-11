@@ -12,6 +12,28 @@ use Keboola\Syrup\Exception\UserException;
 
 class Oracle extends Writer implements WriterInterface
 {
+    protected static $allowedTypes = [
+        'char',
+        'nchar',
+        'varchar2',
+        'nvarchar',
+        'blob',
+        'clob',
+        'nclob',
+        'bfile',
+        'number',
+        'binary_float',
+        'binary_double',
+        'decimal',
+        'float',
+        'integer',
+        'date',
+        'timestamp',
+        'raw',
+        'rowid',
+        'urowid'
+    ];
+
     protected $dbParams;
 
     public function createConnection($dbParams)
@@ -124,5 +146,15 @@ class Oracle extends Writer implements WriterInterface
         $sql .= ")";
 
         oci_execute(oci_parse($this->db, $sql));
+    }
+
+    public static function isTypeValid($type)
+    {
+        return in_array(strtolower($type), static::$allowedTypes);
+    }
+
+    public static function getAllowedTypes()
+    {
+        return static::$allowedTypes;
     }
 }

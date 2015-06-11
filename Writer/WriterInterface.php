@@ -20,4 +20,6 @@ interface WriterInterface
     public function drop($tableName);
 
     public function create(array $table);
+
+    public static function getAllowedTypes();
 }

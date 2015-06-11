@@ -138,7 +138,19 @@ class Configuration
 		if (!isset($sysBucketConfig['db'])) {
 			return [];
 		}
-		return $sysBucketConfig['db'];
+        $credentials = $sysBucketConfig['db'];
+
+        $driver = 'mysql';
+        if (isset($credentials['driver'])) {
+            $driver = $credentials['driver'];
+        }
+
+        /** @var WriterInterface $writerClassName */
+        $writerClassName = __NAMESPACE__ . '\\' . WriterFactory::$driversMap[$driver];
+
+        $credentials['allowedTypes'] = $writerClassName::getAllowedTypes();
+
+		return $credentials;
 	}
 
 	public function getWriters()

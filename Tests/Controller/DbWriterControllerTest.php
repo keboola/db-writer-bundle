@@ -118,12 +118,14 @@ class DbWriterControllerTest extends AbstractTest
         $this->assertArrayHasKey('database', $credentials);
         $this->assertArrayHasKey('user', $credentials);
         $this->assertArrayHasKey('password', $credentials);
+        $this->assertArrayHasKey('allowedTypes', $credentials);
 
         $this->assertNotEmpty($credentials['host']);
         $this->assertNotEmpty($credentials['port']);
         $this->assertNotEmpty($credentials['database']);
         $this->assertNotEmpty($credentials['user']);
         $this->assertNotEmpty($credentials['password']);
+        $this->assertNotEmpty($credentials['allowedTypes']);
     }
 
     /** Tables */

@@ -12,6 +12,13 @@ use Keboola\Syrup\Exception\UserException;
 
 class MySQL extends Writer implements WriterInterface
 {
+    protected static $allowedTypes = [
+        'int', 'smallint', 'bigint',
+        'decimal', 'float', 'double',
+        'date', 'datetime', 'timestamp',
+        'char', 'varchar', 'text', 'blob'
+    ];
+
     /** @var \PDO */
     protected $db;
 
@@ -149,5 +156,10 @@ class MySQL extends Writer implements WriterInterface
             $result[] = '?';
         }
         return implode(',', $result);
+    }
+
+    public static function getAllowedTypes()
+    {
+        return static::$allowedTypes;
     }
 }
