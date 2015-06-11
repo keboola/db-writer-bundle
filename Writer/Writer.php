@@ -35,7 +35,7 @@ abstract class Writer implements WriterInterface
 
         try {
             $this->db = $this->createConnection($dbParams);
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if (strstr(strtolower($e->getMessage()), 'could not find driver')) {
                 throw new ApplicationException("Missing driver");
             }
