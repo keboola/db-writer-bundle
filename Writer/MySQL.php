@@ -158,6 +158,11 @@ class MySQL extends Writer implements WriterInterface
         return implode(',', $result);
     }
 
+    public static function isTypeValid($type)
+    {
+        return in_array(strtolower($type), static::$allowedTypes);
+    }
+
     public static function getAllowedTypes()
     {
         return static::$allowedTypes;
