@@ -180,16 +180,6 @@ class DbWriterController extends ApiController
 			$this->checkParams([
 				'name', 'dbName', 'type', 'size', 'null', 'default'
 			], $param);
-
-            // check types
-            if (!in_array($param['type'], Table::supportedTypes())) {
-                throw new UserException(
-                    sprintf(
-                        "Unsupported type '%s'. Supported types are " . implode(',', Table::supportedTypes()),
-                        $param['type']
-                    )
-                );
-            }
 		}
 
 		$sysTableId = $this->getConfiguration()->updateTableColumns($writerId, $tableId, $params);
