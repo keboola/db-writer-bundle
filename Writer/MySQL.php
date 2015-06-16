@@ -91,7 +91,12 @@ class MySQL extends Writer implements WriterInterface
     public function write($sourceFilename, $outputTableName)
     {
         $csv = new CsvFile($sourceFilename);
+
         $header = $csv->getHeader();
+        array_map(function ($item) {
+            return "`$item`";
+        }, $header);
+
         $csv->next();
 
         while ($csv->current() != null) {
