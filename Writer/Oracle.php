@@ -43,10 +43,22 @@ class Oracle extends Writer implements WriterInterface
         return oci_connect($dbParams['user'], $dbParams['password'], $dbString, 'AL32UTF8');
     }
 
-    public function write($sourceFilename, $outputTableName)
+    public function write($sourceFilename, $outputTableName, $table)
     {
         $csv = new CsvFile($sourceFilename);
-        $header = $csv->getHeader();
+        
+        $colNames = [];
+        foreach ($table['items'] as $item) {
+            if ($item['type'] != 'IGNORE') {
+                $colNames[] = $item['dbName'];
+            }
+        }
+
+        $header = array_map(function ($item) {
+            return "`$item`";
+        }, $colNames);
+
+        $csv->getHeader();
         $csv->next();
 
         while ($csv->current() != null) {

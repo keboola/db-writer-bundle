@@ -88,15 +88,22 @@ class MySQL extends Writer implements WriterInterface
         $this->db->exec($sql);
     }
 
-    public function write($sourceFilename, $outputTableName)
+    public function write($sourceFilename, $outputTableName, $table)
     {
         $csv = new CsvFile($sourceFilename);
 
-        $header = $csv->getHeader();
-        array_map(function ($item) {
-            return "`$item`";
-        }, $header);
+        $colNames = [];
+        foreach ($table['items'] as $item) {
+            if ($item['type'] != 'IGNORE') {
+                $colNames[] = $item['dbName'];
+            }
+        }
 
+        $header = array_map(function ($item) {
+            return "`$item`";
+        }, $colNames);
+
+        $csv->getHeader();
         $csv->next();
 
         while ($csv->current() != null) {
@@ -110,9 +117,15 @@ class MySQL extends Writer implements WriterInterface
 
             $sql = sprintf("INSERT INTO `$outputTableName` (%s) VALUES %s;", implode(',', $header), implode(',', $questionMarks));
 
+            var_dump($sql);
+
             try {
                 $stmt = $this->db->prepare($sql);
                 $result = $stmt->execute($data);
+
+                var_dump($stmt->queryString);
+                var_dump($result);
+
             } catch (\PDOException $e) {
                 throw new UserException("Query failed: " . $e->getMessage(), $e, [
                     'query' => $sql

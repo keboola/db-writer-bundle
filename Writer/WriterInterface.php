@@ -13,7 +13,7 @@ interface WriterInterface
 
     public function createConnection($dbParams);
 
-    public function write($sourceFilename, $outputTableName);
+    public function write($sourceFilename, $outputTableName, $table);
 
     public function isTableValid(array $table);
 

@@ -104,7 +104,7 @@ class Executor extends BaseExecutor
 
             $writer->drop($outputTableName);
             $writer->create($table);
-            $writer->write($sourceFilename, $outputTableName);
+            $writer->write($sourceFilename, $outputTableName, $table);
 
             $uploaded[] = $sourceTableId;
         }
