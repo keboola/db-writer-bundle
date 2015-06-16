@@ -117,15 +117,9 @@ class MySQL extends Writer implements WriterInterface
 
             $sql = sprintf("INSERT INTO `$outputTableName` (%s) VALUES %s;", implode(',', $header), implode(',', $questionMarks));
 
-            var_dump($sql);
-
             try {
                 $stmt = $this->db->prepare($sql);
                 $result = $stmt->execute($data);
-
-                var_dump($stmt->queryString);
-                var_dump($result);
-
             } catch (\PDOException $e) {
                 throw new UserException("Query failed: " . $e->getMessage(), $e, [
                     'query' => $sql

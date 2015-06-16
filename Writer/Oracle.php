@@ -46,17 +46,13 @@ class Oracle extends Writer implements WriterInterface
     public function write($sourceFilename, $outputTableName, $table)
     {
         $csv = new CsvFile($sourceFilename);
-        
-        $colNames = [];
+
+        $header = [];
         foreach ($table['items'] as $item) {
             if ($item['type'] != 'IGNORE') {
-                $colNames[] = $item['dbName'];
+                $header[] = $item['dbName'];
             }
         }
-
-        $header = array_map(function ($item) {
-            return "`$item`";
-        }, $colNames);
 
         $csv->getHeader();
         $csv->next();
