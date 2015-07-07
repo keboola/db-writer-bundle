@@ -4,3 +4,4 @@ parameters.yml
 parameters.yml.dist
 phpunit.xml
 web
+.idea
