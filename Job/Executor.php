@@ -76,7 +76,7 @@ class Executor extends BaseExecutor
         foreach ($tables as $table) {
 
             if (!$writer->isTableValid($table)) {
-                $this->logger->info("Table {$table["tableId"]} not exported.");
+                $this->logger->warn("Table {$table["tableId"]} not exported.");
                 continue;
             }
 
