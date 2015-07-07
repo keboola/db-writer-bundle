@@ -9,7 +9,9 @@ namespace Keboola\DbWriterBundle\Writer;
 
 use Keboola\DbWriterBundle\Model\TableFactory;
 use Keboola\StorageApi\Client as StorageApi;
+use Keboola\StorageApi\Config\Exception;
 use Keboola\StorageApi\Config\Reader;
+use Keboola\Syrup\Exception\UserException;
 
 class Configuration
 {
@@ -178,7 +180,11 @@ class Configuration
 	public function getWriter($id)
 	{
 		$bucketId = $this->getSysBucketId($id);
-		$bucketConfig = $this->readBucketConfig($bucketId);
+        try {
+            $bucketConfig = $this->readBucketConfig($bucketId);
+        } catch (Exception $e) {
+            throw new UserException($e->getMessage(), $e);
+        }
 
 		return [
 			'id'        => $bucketConfig['writerId'],
