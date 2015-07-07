@@ -76,7 +76,7 @@ class Executor extends BaseExecutor
         foreach ($tables as $table) {
 
             if (!$writer->isTableValid($table)) {
-                //@todo: create warning event in SAPI
+                $this->logger->info("Table {$table["tableId"]} not exported.");
                 continue;
             }
 
