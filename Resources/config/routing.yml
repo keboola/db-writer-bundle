@@ -1,7 +1,19 @@
+# Create job
+
+keboola_db_writer_driver_create_job:
+    path:     /{driver}/run
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:run }
+    methods:  [POST]
+
 # Writers
 keboola_db_writer_post_configs:
     path: /configs
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postWriter }
+    methods:  [POST]
+
+keboola_db_writer_driver_post_configs:
+    path: /{driver}/configs
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postWriter, driver: null }
     methods:  [POST]
 
 keboola_db_writer_get_configs:
@@ -9,9 +21,19 @@ keboola_db_writer_get_configs:
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getWriters, id: null }
     methods:  [GET]
 
+keboola_db_writer_driver_get_configs:
+    path: /{driver}/configs/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getWriters, id: null, driver: null }
+    methods:  [GET]
+
 keboola_db_writer_delete_writers:
     path: /configs/{id}
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteWriters }
+    methods:  [DELETE]
+
+keboola_db_writer_driver_delete_writers:
+    path: /{driver}/configs/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteWriters, driver: null }
     methods:  [DELETE]
 
 # Credentials
@@ -20,10 +42,21 @@ keboola_db_writer_get_credentials:
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getCredentials }
     methods:  [GET]
 
+keboola_db_writer_driver_get_credentials:
+    path: /{driver}/{writerId}/credentials
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getCredentials, driver: null }
+    methods:  [GET]
+
 keboola_db_writer_post_credentials:
     path: /{writerId}/credentials
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postCredentials }
     methods:  [POST]
+
+keboola_db_writer_driver_post_credentials:
+    path: /{driver}/{writerId}/credentials
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postCredentials, driver: null }
+    methods:  [POST]
+
 
 # Tables
 keboola_db_writer_get_tables:
@@ -31,15 +64,31 @@ keboola_db_writer_get_tables:
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getTables, id: null }
     methods:  [GET]
 
+keboola_db_writer_driver_get_tables:
+    path: /{driver}/{writerId}/tables/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getTables, id: null, driver: null }
+    methods:  [GET]
+
 keboola_db_writer_post_tables:
     path: /{writerId}/tables/{id}
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postTable }
     methods:  [POST]
 
+keboola_db_writer_driver_post_tables:
+    path: /{driver}/{writerId}/tables/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postTable, driver: null }
+    methods:  [POST]
+
+
 # Columns
 keboola_db_writer_post_columns:
     path: /{writerId}/tables/{tableId}/columns
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postColumns }
+    methods:  [POST]
+
+keboola_db_writer_driver_post_columns:
+    path: /{driver}/{writerId}/tables/{tableId}/columns
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postColumns, driver: null }
     methods:  [POST]
 
 # Jobs
@@ -48,7 +97,17 @@ keboola_db_writer_get_jobs:
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getJobs }
     methods:  [GET]
 
+keboola_db_writer_driver_get_jobs:
+    path: /{driver}/{writerId}/jobs
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getJobs, driver: null }
+    methods:  [GET]
+
 keboola_db_writer_cancel_waiting_jobs:
     path: /{writerId}/jobs/cancel
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:cancelWaitingJobs }
+    methods:  [POST]
+
+keboola_db_writer_driver_cancel_waiting_jobs:
+    path: /{driver}/{writerId}/jobs/cancel
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:cancelWaitingJobs, driver: null }
     methods:  [POST]

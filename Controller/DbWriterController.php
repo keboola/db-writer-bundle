@@ -5,8 +5,10 @@ namespace Keboola\DbWriterBundle\Controller;
 use Keboola\DbWriterBundle\Exception\ParameterMissingException;
 use Keboola\DbWriterBundle\Model\Table;
 use Keboola\DbWriterBundle\Writer\Configuration;
+use Keboola\DbWriterBundle\Writer\WriterFactory;
 use Keboola\Syrup\Elasticsearch\JobMapper;
 use Keboola\Syrup\Elasticsearch\Search;
+use Keboola\Syrup\Exception\ApplicationException;
 use Keboola\Syrup\Exception\UserException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -49,6 +51,102 @@ class DbWriterController extends ApiController
     {
         return $this->container->get('syrup.elasticsearch.search');
     }
+
+    /**
+     * @param $driver
+     */
+    private function checkDriver($driver)
+    {
+        if (!in_array($driver, array_keys(WriterFactory::$driversMap))) {
+            throw new UserException("Driver '{$driver}' not found.");
+        }
+    }
+
+    /**
+     * Make sure that a given KBC component is valid.
+     *
+     * @param string $componentName KBC Component name.
+     * @throw UserException in case of invalid component.
+     */
+    private function checkComponent($componentName)
+    {
+        // Check list of components
+        $components = $this->storageApi->indexAction();
+        foreach ($components["components"] as $c) {
+            if ($c["id"] == $componentName) {
+                $component = $c;
+                break;
+            }
+        }
+
+        if (!isset($component)) {
+            throw new UserException("Component '$componentName' not found.");
+        }
+    }
+
+    /** Override Run Action */
+
+    /**
+     * Override for custom component
+     *
+     * @param Request $request
+     * @param string $driver
+     * @return JsonResponse
+     * @throws ApplicationException
+     */
+    public function runAction(Request $request, $driver = null)
+    {
+        // Get params from request
+        $params = $this->getPostJson($request);
+
+        $component = $this->getParameter("app_name");
+
+        if ($driver && $driver != '') {
+            $component = $this->getParameter("app_name") . '-' . $driver;
+            $this->checkComponent($component);
+            $this->checkDriver($driver);
+        }
+
+        $params["component"] = $component;
+
+        // check params against ES mapping
+        $this->checkMappingParams($params);
+
+        // Create new job
+        $job = $this->createJob('run', $params);
+
+        // Add job to Elasticsearch
+        try {
+            /** @var JobMapper $jobMapper */
+            $jobMapper = $this->container->get('syrup.elasticsearch.current_component_job_mapper');
+            $jobId = $jobMapper->create($job);
+        } catch (\Exception $e) {
+            throw new ApplicationException("Failed to create job", $e);
+        }
+
+        // Add job to SQS
+        $queueName = 'default';
+        $queueParams = $this->container->getParameter('queue');
+
+        if (isset($queueParams['sqs'])) {
+            $queueName = $queueParams['sqs'];
+        }
+        $messageId = $this->enqueue($jobId, $queueName);
+
+        $this->logger->info('Job created', [
+            'sqsQueue' => $queueName,
+            'sqsMessageId' => $messageId,
+            'job' => $job->getLogData()
+        ]);
+
+        // Response with link to job resource
+        return $this->createJsonResponse([
+            'id'        => $jobId,
+            'url'       => $this->getJobUrl($jobId),
+            'status'    => $job->getStatus()
+        ], 202);
+    }
+
 
 	/** Writers */
 

@@ -7,6 +7,7 @@
 
 namespace Keboola\DbWriterBundle\Job;
 
+use Keboola\DbWriterBundle\Monolog\Processor\DbWriterProcessor;
 use Keboola\DbWriterBundle\Writer\ConfigurationFactory;
 use Keboola\DbWriterBundle\Writer\Writer;
 use Keboola\DbWriterBundle\Writer\WriterFactory;
@@ -37,9 +38,34 @@ class Executor extends BaseExecutor
         $this->writerFactory = $writerFactory;
 	}
 
+    /**
+     * @param $id
+     */
+    protected function getComponent($id)
+    {
+        // Check list of components
+        $components = $this->storageApi->indexAction();
+        foreach ($components["components"] as $c) {
+            if ($c["id"] == $id) {
+                $component = $c;
+            }
+        }
+        if (!isset($component)) {
+            throw new UserException("Component '{$id}' not found.");
+        }
+        return $component;
+    }
+
+
 	public function execute(Job $job)
 	{
         $options = $job->getParams();
+
+        if (isset($options["component"])) {
+            $component = $this->getComponent($options["component"]);
+            $processor = new DbWriterProcessor($component['id']);
+            $this->logger->pushProcessor([$processor, 'processRecord']);
+        }
 
         $writerId = null;
         if (isset($options['config'])) {
@@ -76,7 +102,7 @@ class Executor extends BaseExecutor
         foreach ($tables as $table) {
 
             if (!$writer->isTableValid($table)) {
-                //@todo: create warning event in SAPI
+                $this->logger->warn("Table {$table["tableId"]} not exported.");
                 continue;
             }
 
