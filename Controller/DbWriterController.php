@@ -5,6 +5,7 @@ namespace Keboola\DbWriterBundle\Controller;
 use Keboola\DbWriterBundle\Exception\ParameterMissingException;
 use Keboola\DbWriterBundle\Model\Table;
 use Keboola\DbWriterBundle\Writer\Configuration;
+use Keboola\DbWriterBundle\Writer\ConfigurationFactory;
 use Keboola\DbWriterBundle\Writer\WriterFactory;
 use Keboola\Syrup\Elasticsearch\JobMapper;
 use Keboola\Syrup\Elasticsearch\Search;
@@ -17,10 +18,13 @@ use Keboola\Syrup\Job\Metadata\Job;
 
 class DbWriterController extends ApiController
 {
+
+    protected $driver = 'generic';
 	/** @return Configuration */
-	protected function getConfiguration()
+	protected function getConfiguration($driver = 'generic')
 	{
-		return $this->container->get('wr_db.configuration_factory')->get($this->storageApi);
+        $factory = new ConfigurationFactory($this->componentName, $this->driver);
+        return $factory->get($this->storageApi);
 	}
 
     /**
@@ -84,6 +88,21 @@ class DbWriterController extends ApiController
         }
     }
 
+    /**
+     * @param Request $request
+     */
+    public function preExecute(Request $request)
+    {
+        parent::preExecute($request);
+        if ($request->get("driver")) {
+            $this->checkDriver($request->get("driver"));
+            $component = $this->getParameter("app_name") . '-' . $request->get("driver");
+            $this->checkComponent($component);
+            $this->componentName = $component;
+            $this->driver = $request->get("driver");
+        }
+    }
+
     /** Override Run Action */
 
     /**
@@ -99,15 +118,7 @@ class DbWriterController extends ApiController
         // Get params from request
         $params = $this->getPostJson($request);
 
-        $component = $this->getParameter("app_name");
-
-        if ($driver && $driver != '') {
-            $component = $this->getParameter("app_name") . '-' . $driver;
-            $this->checkComponent($component);
-            $this->checkDriver($driver);
-        }
-
-        $params["component"] = $component;
+        $params["component"] = $this->componentName;
 
         // check params against ES mapping
         $this->checkMappingParams($params);
@@ -307,7 +318,7 @@ class DbWriterController extends ApiController
 		$projectId = $sapiData['owner']['id'];
 
 		$jobs = $this->getElasticSearch()->getJobs([
-            'component' => $this->componentName,
+            'component' => $this->getParameter("app_name"),
             'runId' => $runId,
             'query' => $query,
             'projectId' => $projectId,
@@ -336,7 +347,7 @@ class DbWriterController extends ApiController
 
 		$jobs = $this->getElasticSearch()->getJobs([
             'projectId' => $projectId,
-            'component' => $this->componentName,
+            'component' => $this->getParameter("app_name"),
             'query' => $query
         ]);
 

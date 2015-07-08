@@ -6,6 +6,16 @@ keboola_db_writer_driver_create_job:
     methods:  [POST]
 
 # Writers
+keboola_db_writer_get_configs:
+    path: /configs
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getWriters, id: null }
+    methods:  [GET]
+
+keboola_db_writer_driver_get_configs:
+    path: /{driver}/configs
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getWriters, id: null, driver: null }
+    methods:  [GET]
+
 keboola_db_writer_post_configs:
     path: /configs
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postWriter }
@@ -16,12 +26,12 @@ keboola_db_writer_driver_post_configs:
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postWriter, driver: null }
     methods:  [POST]
 
-keboola_db_writer_get_configs:
+keboola_db_writer_get_config:
     path: /configs/{id}
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getWriters, id: null }
     methods:  [GET]
 
-keboola_db_writer_driver_get_configs:
+keboola_db_writer_driver_get_config:
     path: /{driver}/configs/{id}
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getWriters, id: null, driver: null }
     methods:  [GET]

@@ -32,7 +32,7 @@ class AbstractTest extends WebTestCase
 
     protected $writerId = 'test';
 
-    protected function setUp()
+    protected function setUp($driver = null)
     {
         self::$client = static::createClient();
         $this->container = self::$client->getContainer();
@@ -51,7 +51,12 @@ class AbstractTest extends WebTestCase
         ]);
 
         /** @var ConfigurationFactory $configurationFactory */
-        $configurationFactory = $this->container->get('wr_db.configuration_factory');
+        if ($driver != null) {
+            $configurationFactory = new ConfigurationFactory($this->componentName . "-" . $driver, $driver);
+        } else {
+            $configurationFactory = new ConfigurationFactory($this->componentName);
+        }
+
         $this->configuration = $configurationFactory->get($this->storageApi);
 
         // Cleanup

@@ -12,15 +12,17 @@ use Keboola\StorageApi\Client as StorageApi;
 class ConfigurationFactory
 {
 	protected $componentName;
+	protected $driver = 'generic';
 
-	public function __construct($componentName)
+	public function __construct($componentName, $driver = 'generic')
 	{
 		$this->componentName = $componentName;
+		$this->driver = $driver;
 	}
 
 	public function get(StorageApi $sapi)
 	{
-		return new Configuration($this->componentName, $sapi);
+		return new Configuration($this->componentName, $sapi, $this->driver);
 	}
 
 }
