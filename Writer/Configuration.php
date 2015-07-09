@@ -20,6 +20,8 @@ class Configuration
 
 	protected $componentName;
 
+    protected $driver = 'generic';
+
 	const SYS_PREFIX = 'sys.c-';
 
 	const IN_PREFIX = 'in.c-';
@@ -29,10 +31,11 @@ class Configuration
 	/** @var  TableFactory */
 	protected $tableFactory;
 
-	public function __construct($componentName, $sapi)
+	public function __construct($componentName, $sapi, $driver = 'generic')
 	{
 		$this->componentName = $componentName;
 		$this->storageApi = $sapi;
+		$this->driver = $driver;
 
 		$this->tableFactory = new TableFactory($this);
 	}
@@ -100,12 +103,13 @@ class Configuration
 	public function createWriter($name, $description='')
 	{
 		$bucketName = $this->componentName .'-' . $name;
-        $bucketId = 'sys.c-' . $bucketName;
+        $bucketId = self::SYS_PREFIX . $bucketName;
         if (!$this->storageApi->bucketExists($bucketId)) {
             $this->storageApi->createBucket($bucketName, StorageApi::STAGE_SYS, $description);
         }
 
 		$this->storageApi->setBucketAttribute($bucketId, 'writer', 'db');
+		$this->storageApi->setBucketAttribute($bucketId, 'driver', $this->driver);
 		$this->storageApi->setBucketAttribute($bucketId, 'writerId', $name);
 
 		if (!empty($description)) {
@@ -160,7 +164,28 @@ class Configuration
 		$buckets = $this->storageApi->listBuckets();
 
 		$writerBuckets = array_filter($buckets, function ($item) {
-			return ($this->getSapiAttribute($item['attributes'], 'writer') == 'db');
+			return (
+                $this->getSapiAttribute($item['attributes'], 'writer') == 'db'
+                &&
+                (
+                    (
+                        $this->driver == 'generic'
+                        &&
+                        (
+                            $this->getSapiAttribute($item['attributes'], 'driver') == $this->driver
+                            ||
+                            $this->getSapiAttribute($item['attributes'], 'driver') == null
+                        )
+                    )
+                    ||
+                    (
+                        $this->driver != 'generic'
+                        &&
+                        $this->getSapiAttribute($item['attributes'], 'driver') == $this->driver
+                    )
+                )
+
+            );
 		});
 
 		$res = [];
