@@ -17,6 +17,7 @@
     <testsuites>
         <testsuite name="Db Writer Tests">
             <file>Tests/Controller/DbWriterControllerTest.php</file>
+            <file>Tests/Controller/DbWriterDriverControllerTest.php</file>
             <file>Tests/Writer/WriterTest.php</file>
         </testsuite>
     </testsuites>

@@ -8,13 +8,71 @@ use Keboola\Syrup\Job\Metadata\Job;
 use Keboola\Syrup\Service\StorageApi\StorageApiService;
 use Symfony\Component\HttpFoundation\Response;
 
-class DbWriterControllerTest extends AbstractTest
+class DbWriterDriverControllerTest extends AbstractTest
 {
 
-    public function testPostWriterAction()
+    public function setUp()
     {
+        parent::setUp('mysql');
+    }
+
+    protected function mockSapiClientWithDriver()
+    {
+        $indexActionResult = array (
+            "components" => [
+                0 =>
+                    array (
+                        'id' => 'wr-db',
+                        'type' => 'writer',
+                        'name' => 'Database',
+                        'description' => 'Write data to MySQL or Oracle',
+                        'hasUI' => true,
+                        'hasRun' => true,
+                        'ico32' => '',
+                        'ico64' => '',
+                        'data' =>
+                            array (
+                            ),
+                        'uri' => 'https://syrup.keboola.com/wr-db',
+                        'configurations' => []
+                    ),
+                1 =>
+                    array (
+                        'id' => 'wr-db-mysql',
+                        'type' => 'writer',
+                        'name' => 'Database',
+                        'description' => 'Write data to MySQL ',
+                        'hasUI' => true,
+                        'hasRun' => true,
+                        'ico32' => '',
+                        'ico64' => '',
+                        'data' =>
+                            array (
+                            ),
+                        'uri' => 'https://syrup.keboola.com/wr-db/mysql',
+                        'configurations' => []
+                    ),
+            ]
+        );
+        $sapiStub = $this->getMockBuilder("\\Keboola\\StorageApi\\Client")
+            ->disableOriginalConstructor()
+            ->setMethods(["indexAction"])
+            ->getMock();
+        $sapiStub->expects($this->once())
+            ->method("indexAction")
+            ->withAnyParameters()
+            ->will($this->returnValue($indexActionResult));
+
+        $serviceMock = new \Keboola\DbWriterBundle\Test\Mock\StorageApiService();
+        $serviceMock->setStorageApiStub($sapiStub);
+        static::$kernel->getContainer()->set("syrup.storage_api", $serviceMock);
+    }
+
+    public function testPostWriterDriverAction()
+    {
+        $this->mockSapiClientWithDriver();
         self::$client->request(
-            'POST', $this->componentName . '/configs',
+            'POST', $this->componentName . '/mysql/configs',
             [],
             [],
             [],
@@ -31,20 +89,37 @@ class DbWriterControllerTest extends AbstractTest
         $this->assertEquals('test', $response['name']);
     }
 
-    public function testGetWritersAction()
+    public function testGetWritersNonExistingDriverAction()
     {
         $this->createWriter();
 
-        self::$client->request('GET', $this->componentName . '/configs');
+        self::$client->request('GET', $this->componentName . '/aabb/configs');
+
+        $responseJson = self::$client->getResponse()->getContent();
+        $response = json_decode($responseJson, true);
+        $this->assertEquals($response["message"], "User error: Driver 'aabb' not found.");
+    }
+
+    public function testGetWritersDriverAction()
+    {
+        $this->mockSapiClientWithDriver();
+        $this->createWriter();
+
+        self::$client->request('GET', $this->componentName . '/mysql/configs');
 
         $responseJson = self::$client->getResponse()->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals('test', $response[0]['id']);
         $this->assertEquals('test', $response[0]['name']);
+    }
 
-        self::$client->restart();
-        self::$client->request('GET', $this->componentName . '/configs/' . $this->writerId);
+    public function testGetWriterDriverAction()
+    {
+        $this->mockSapiClientWithDriver();
+        $this->createWriter();
+
+        self::$client->request('GET', $this->componentName . '/mysql/configs/' . $this->writerId);
 
         $responseJson = self::$client->getResponse()->getContent();
         $response = json_decode($responseJson, true);
@@ -53,11 +128,12 @@ class DbWriterControllerTest extends AbstractTest
         $this->assertEquals('test', $response['name']);
     }
 
-    public function testDeleteWritersAction()
+    public function testDeleteWritersDriverAction()
     {
+        $this->mockSapiClientWithDriver();
         $this->createWriter();
 
-        self::$client->request('DELETE', $this->componentName . '/configs/' . $this->writerId);
+        self::$client->request('DELETE', $this->componentName . '/mysql/configs/' . $this->writerId);
 
         /* @var Response $response */
         $response = self::$client->getResponse();
@@ -66,19 +142,19 @@ class DbWriterControllerTest extends AbstractTest
 
         $this->assertEquals(204, $response->getStatusCode());
         $this->assertEmpty($writers);
-
     }
 
     /** Credentials */
 
-    public function testPostCredentialsAction()
+    public function testPostCredentialsDriverAction()
     {
+        $this->mockSapiClientWithDriver();
         $this->createWriter();
 
         $testing = $this->container->getParameter('testing');
 
         self::$client->request(
-            'POST', $this->componentName . '/' . $this->writerId . '/credentials',
+            'POST', $this->componentName . '/mysql/' . $this->writerId . '/credentials',
             [],
             [],
             [],
@@ -105,13 +181,14 @@ class DbWriterControllerTest extends AbstractTest
         $this->assertNotEmpty($credentials['password']);
     }
 
-    public function testGetCredentialsAction()
+    public function testGetCredentialsDriverAction()
     {
+        $this->mockSapiClientWithDriver();
         $this->createWriter();
         $testing = $this->container->getParameter('testing');
         $this->configuration->setCredentials($this->writerId, $testing['mysql']['db']);
 
-        self::$client->request('GET', $this->componentName . '/' . $this->writerId . '/credentials');
+        self::$client->request('GET', $this->componentName . '/mysql/' . $this->writerId . '/credentials');
 
         $responseJson = self::$client->getResponse()->getContent();
         $credentials = json_decode($responseJson, true);
@@ -133,13 +210,14 @@ class DbWriterControllerTest extends AbstractTest
 
     /** Tables */
 
-    public function testPostTableAction()
+    public function testPostTableDriverAction()
     {
+        $this->mockSapiClientWithDriver();
         $this->createWriter();
         $testing = $this->container->getParameter('testing');
 
         self::$client->request(
-            'POST', $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id'],
+            'POST', $this->componentName . '/mysql/' . $this->writerId . '/tables/' . $testing['table']['id'],
             [],
             [],
             [],
@@ -157,15 +235,16 @@ class DbWriterControllerTest extends AbstractTest
         $this->assertEquals($tableId, $response['tableId']);
     }
 
-    public function testGetTablesAction()
+    public function testGetTablesDriverAction()
     {
+        $this->mockSapiClientWithDriver();
         $this->createWriter();
         $testing = $this->container->getParameter('testing');
         $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
 
         self::$client->request(
             'GET',
-            $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id']
+            $this->componentName . '/mysql/' . $this->writerId . '/tables/' . $testing['table']['id']
         );
 
         $responseJson = self::$client->getResponse()->getContent();
@@ -177,7 +256,6 @@ class DbWriterControllerTest extends AbstractTest
         $this->assertNotEmpty($response['lastChange']);
         $this->assertNotEmpty($response['columns']);
 
-
         foreach ($response['columns'] as $col) {
             $this->assertNotEmpty($col['name']);
             $this->assertNotEmpty($col['dbName']);
@@ -188,15 +266,16 @@ class DbWriterControllerTest extends AbstractTest
 
     /** Columns */
 
-    public function testPostColumnsAction()
+    public function testPostColumnsDriverAction()
     {
+        $this->mockSapiClientWithDriver();
         $this->createWriter();
         $testing = $this->container->getParameter('testing');
         $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
 
         self::$client->request(
             'POST',
-            $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id'] . '/columns',
+            $this->componentName . '/mysql/' . $this->writerId . '/tables/' . $testing['table']['id'] . '/columns',
             [],
             [],
             [],
@@ -206,35 +285,4 @@ class DbWriterControllerTest extends AbstractTest
         $this->assertEquals(200, self::$client->getResponse()->getStatusCode());
     }
 
-    /** Jobs */
-    public function testGetJobsAction()
-    {
-        $this->createWriter();
-        $testing = $this->container->getParameter('testing');
-        $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
-
-        /** @var JobMapper $jobMapper */
-        $jobMapper = $this->container->get('syrup.elasticsearch.current_component_job_mapper');
-        $jobMapper->create($this->createJob('run', ['config' => 'test']));
-
-        sleep(2);
-
-        self::$client->request(
-            'GET',
-            $this->componentName . '/' . $this->writerId . '/jobs'
-        );
-
-        $responseJson = self::$client->getResponse()->getContent();
-        $response = json_decode($responseJson, true);
-
-        $this->assertNotEmpty($response);
-        $this->assertEquals(200, self::$client->getResponse()->getStatusCode());
-    }
-
-    protected function createJob($command, $params)
-    {
-        $jobFactory = $this->container->get('syrup.job_factory');
-        $jobFactory->setStorageApiClient($this->storageApi);
-        return $jobFactory->create($command, $params);
-    }
 }

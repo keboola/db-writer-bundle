@@ -2,6 +2,9 @@
   "params": {
     "dynamic": "strict",
     "properties": {
+      "component": {
+        "type": "string"
+      },
       "config": {
         "type": "string"
       },
