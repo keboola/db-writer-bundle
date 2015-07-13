@@ -16,7 +16,8 @@ class WriterFactory
         'mysql' => 'MySQL',
         'oracle' => 'Oracle',
         'pgsql' => 'PgSQL',
-        'mssql' => 'MsSQL'
+        'mssql' => 'MsSQL',
+        'redshift' => 'Redshift'
     ];
 
     /** @var Logger */

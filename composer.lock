@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "68b6b40f620727f85a6f44d0b02a3659",
+    "hash": "29a1367f2ef265c59c92d2d3aa3222ca",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -1382,16 +1382,16 @@
         },
         {
             "name": "keboola/storage-api-client",
-            "version": "2.12.14",
+            "version": "2.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/storage-api-php-client.git",
-                "reference": "e85e30f2c7159a9c9f51222f1e81b2ddab35ad72"
+                "reference": "ec6aab33e958e36dabec097054349a0905d66e0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/storage-api-php-client/zipball/e85e30f2c7159a9c9f51222f1e81b2ddab35ad72",
-                "reference": "e85e30f2c7159a9c9f51222f1e81b2ddab35ad72",
+                "url": "https://api.github.com/repos/keboola/storage-api-php-client/zipball/ec6aab33e958e36dabec097054349a0905d66e0a",
+                "reference": "ec6aab33e958e36dabec097054349a0905d66e0a",
                 "shasum": ""
             },
             "require": {
@@ -1420,20 +1420,20 @@
             ],
             "description": "Keboola Storage API PHP CLient",
             "homepage": "http://keboola.com",
-            "time": "2015-05-26 15:12:29"
+            "time": "2015-07-13 11:26:33"
         },
         {
             "name": "keboola/syrup",
-            "version": "2.3.7",
+            "version": "2.3.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/syrup.git",
-                "reference": "714b2a5f2225e4b711b5836a20cff5d408e6922d"
+                "reference": "c7e752ba64a0068185ad3868383673b59e8da9e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/syrup/zipball/714b2a5f2225e4b711b5836a20cff5d408e6922d",
-                "reference": "714b2a5f2225e4b711b5836a20cff5d408e6922d",
+                "url": "https://api.github.com/repos/keboola/syrup/zipball/c7e752ba64a0068185ad3868383673b59e8da9e3",
+                "reference": "c7e752ba64a0068185ad3868383673b59e8da9e3",
                 "shasum": ""
             },
             "require": {
@@ -1485,7 +1485,7 @@
                 }
             ],
             "description": "Syrup",
-            "time": "2015-06-23 15:05:55"
+            "time": "2015-07-03 09:16:45"
         },
         {
             "name": "kriswallsmith/assetic",
@@ -1563,16 +1563,16 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "1.14.0",
+            "version": "1.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "b287fbbe1ca27847064beff2bad7fb6920bf08cc"
+                "reference": "dc5150cc608f2334c72c3b6a553ec9668a4156b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/b287fbbe1ca27847064beff2bad7fb6920bf08cc",
-                "reference": "b287fbbe1ca27847064beff2bad7fb6920bf08cc",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/dc5150cc608f2334c72c3b6a553ec9668a4156b0",
+                "reference": "dc5150cc608f2334c72c3b6a553ec9668a4156b0",
                 "shasum": ""
             },
             "require": {
@@ -1609,7 +1609,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.14.x-dev"
+                    "dev-master": "1.15.x-dev"
                 }
             },
             "autoload": {
@@ -1635,7 +1635,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2015-06-19 13:29:54"
+            "time": "2015-07-12 13:54:09"
         },
         {
             "name": "pimple/pimple",
@@ -2165,16 +2165,16 @@
         },
         {
             "name": "symfony/symfony",
-            "version": "v2.7.1",
+            "version": "v2.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "932b6e7499c670f4db6d0b871477a4a3ca161e74"
+                "reference": "969d709ad428076bf1084e386dc26dd904d9fb84"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/932b6e7499c670f4db6d0b871477a4a3ca161e74",
-                "reference": "932b6e7499c670f4db6d0b871477a4a3ca161e74",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/969d709ad428076bf1084e386dc26dd904d9fb84",
+                "reference": "969d709ad428076bf1084e386dc26dd904d9fb84",
                 "shasum": ""
             },
             "require": {
@@ -2283,7 +2283,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2015-06-11 21:15:28"
+            "time": "2015-07-13 19:27:49"
         },
         {
             "name": "twig/twig",
@@ -2344,6 +2344,39 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "keboola/provisioning-client",
+            "version": "0.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/keboola/provisioning-client.git",
+                "reference": "ea83a009bfbc08adc41d45a4175ae2bb927fbb10"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/keboola/provisioning-client/zipball/ea83a009bfbc08adc41d45a4175ae2bb927fbb10",
+                "reference": "ea83a009bfbc08adc41d45a4175ae2bb927fbb10",
+                "shasum": ""
+            },
+            "require": {
+                "guzzle/guzzle": "~3.7"
+            },
+            "require-dev": {
+                "doctrine/orm": "~2.3.0",
+                "keboola/storage-api-client": "~2.12.4",
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Keboola\\Provisioning": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "description": "Keboola Provisioning Client",
+            "homepage": "http://keboola.com",
+            "time": "2015-04-19 00:54:40"
+        },
         {
             "name": "phpunit/php-code-coverage",
             "version": "1.2.18",
