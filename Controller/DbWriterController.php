@@ -3,9 +3,7 @@
 namespace Keboola\DbWriterBundle\Controller;
 
 use Keboola\DbWriterBundle\Exception\ParameterMissingException;
-use Keboola\DbWriterBundle\Model\Table;
 use Keboola\DbWriterBundle\Writer\Configuration;
-use Keboola\DbWriterBundle\Writer\ConfigurationFactory;
 use Keboola\DbWriterBundle\Writer\WriterFactory;
 use Keboola\Syrup\Elasticsearch\JobMapper;
 use Keboola\Syrup\Elasticsearch\Search;
@@ -18,13 +16,12 @@ use Keboola\Syrup\Job\Metadata\Job;
 
 class DbWriterController extends ApiController
 {
-
     protected $driver = 'generic';
+
 	/** @return Configuration */
-	protected function getConfiguration($driver = 'generic')
+	protected function getConfiguration()
 	{
-        $factory = new ConfigurationFactory($this->componentName, $this->driver);
-        return $factory->get($this->storageApi);
+        return new Configuration($this->componentName, $this->storageApi, $this->driver);
 	}
 
     /**

@@ -9,7 +9,6 @@ namespace Keboola\DbWriterBundle\Test;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Keboola\DbWriterBundle\Writer\Configuration;
-use Keboola\DbWriterBundle\Writer\ConfigurationFactory;
 use Keboola\StorageApi\Client as SapiClient;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -50,14 +49,11 @@ class AbstractTest extends WebTestCase
             'userAgent' => $this->componentName
         ]);
 
-        /** @var ConfigurationFactory $configurationFactory */
         if ($driver != null) {
-            $configurationFactory = new ConfigurationFactory($this->componentName . "-" . $driver, $driver);
+            $this->configuration = new Configuration($this->componentName . '-' . $driver, $this->storageApi, $driver);
         } else {
-            $configurationFactory = new ConfigurationFactory($this->componentName);
+            $this->configuration = new Configuration($this->componentName, $this->storageApi);
         }
-
-        $this->configuration = $configurationFactory->get($this->storageApi);
 
         // Cleanup
         $sysBucketId = $this->configuration->getSysBucketId($this->writerId);

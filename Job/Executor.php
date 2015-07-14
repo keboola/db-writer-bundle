@@ -8,8 +8,7 @@
 namespace Keboola\DbWriterBundle\Job;
 
 use Keboola\DbWriterBundle\Monolog\Processor\DbWriterProcessor;
-use Keboola\DbWriterBundle\Writer\ConfigurationFactory;
-use Keboola\DbWriterBundle\Writer\Writer;
+use Keboola\DbWriterBundle\Writer\Configuration;
 use Keboola\DbWriterBundle\Writer\WriterFactory;
 use Keboola\DbWriterBundle\Writer\WriterInterface;
 use Keboola\StorageApi\ClientException;
@@ -21,8 +20,7 @@ use Keboola\Syrup\Job\Metadata\Job;
 
 class Executor extends BaseExecutor
 {
-	/** @var ConfigurationFactory  */
-	protected $configurationFactory;
+	protected $componentName;
 
 	/** @var Logger */
 	protected $logger;
@@ -30,9 +28,9 @@ class Executor extends BaseExecutor
 	/** @var Temp */
 	protected $temp;
 
-	public function __construct(ConfigurationFactory $configurationFactory, WriterFactory $writerFactory, Logger $logger, Temp $temp)
+	public function __construct($componentName, WriterFactory $writerFactory, Logger $logger, Temp $temp)
 	{
-		$this->configurationFactory = $configurationFactory;
+		$this->componentName = $componentName;
 		$this->logger = $logger;
 		$this->temp = $temp;
         $this->writerFactory = $writerFactory;
@@ -60,11 +58,19 @@ class Executor extends BaseExecutor
 	public function execute(Job $job)
 	{
         $options = $job->getParams();
+        $driver = 'generic';
 
         if (isset($options["component"])) {
             $component = $this->getComponent($options["component"]);
             $processor = new DbWriterProcessor($component['id']);
             $this->logger->pushProcessor([$processor, 'processRecord']);
+
+            // get driver from componentName
+            if ($options['component'] != $this->componentName) {
+                $driver = str_replace($this->componentName . '-', '', $options['component']);
+            }
+            // replace componentName
+            $this->componentName = $options['component'];
         }
 
         $writerId = null;
@@ -78,7 +84,7 @@ class Executor extends BaseExecutor
             throw new UserException('Parameter "config" or "writer" must be specified');
         }
 
-        $configuration = $this->configurationFactory->get($this->storageApi);
+        $configuration = new Configuration($this->componentName, $this->storageApi, $driver);
         $writerConfig = $configuration->getSysBucket($writerId);
         $tables = $configuration->getSysTables($writerId);
 
