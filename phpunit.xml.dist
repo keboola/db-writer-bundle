@@ -19,6 +19,7 @@
             <file>Tests/Controller/DbWriterControllerTest.php</file>
             <file>Tests/Controller/DbWriterDriverControllerTest.php</file>
             <file>Tests/Writer/WriterTest.php</file>
+            <file>Tests/Writer/RedshiftWriterTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
