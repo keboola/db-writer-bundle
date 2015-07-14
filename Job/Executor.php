@@ -12,6 +12,7 @@ use Keboola\DbWriterBundle\Writer\Configuration;
 use Keboola\DbWriterBundle\Writer\WriterFactory;
 use Keboola\DbWriterBundle\Writer\WriterInterface;
 use Keboola\StorageApi\ClientException;
+use Keboola\StorageApi\Options\GetFileOptions;
 use Keboola\Syrup\Exception\UserException;
 use Keboola\Temp\Temp;
 use Monolog\Logger;
@@ -122,21 +123,38 @@ class Executor extends BaseExecutor
                 }
             }
 
-            $sourceFilename = $this->temp->createTmpFile(null, true);
+            if ($writer->isAsync()) {
+                try {
+                    $job = $this->storageApi->exportTableAsync($sourceTableId, [
+                        'columns' => $colNames,
+                        'gzip' => true
+                    ]);
+                    $fileInfo = $this->storageApi->getFile($job["file"]["id"], (new GetFileOptions())->setFederationToken(true));
+                } catch (ClientException $e) {
+                    throw new UserException("Error exporting table from StorageAPI", $e, [
+                        'message' => $e->getMessage()
+                    ]);
+                }
+                $writer->drop($outputTableName);
+                $writer->create($table);
+                $writer->writeAsync($fileInfo, $outputTableName);
 
-            try {
-                $this->storageApi->exportTable($sourceTableId, $sourceFilename, [
-                    'columns' => $colNames
-                ]);
-            } catch (ClientException $e) {
-                throw new UserException("Error exporting table from StorageAPI", $e, [
-                    'message' => $e->getMessage()
-                ]);
+            } else {
+
+                $sourceFilename = $this->temp->createTmpFile(null, true);
+                try {
+                    $this->storageApi->exportTable($sourceTableId, $sourceFilename, [
+                        'columns' => $colNames
+                    ]);
+                } catch (ClientException $e) {
+                    throw new UserException("Error exporting table from StorageAPI", $e, [
+                        'message' => $e->getMessage()
+                    ]);
+                }
+                $writer->drop($outputTableName);
+                $writer->create($table);
+                $writer->write($sourceFilename, $outputTableName, $table);
             }
-
-            $writer->drop($outputTableName);
-            $writer->create($table);
-            $writer->write($sourceFilename, $outputTableName, $table);
 
             $uploaded[] = $sourceTableId;
         }

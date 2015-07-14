@@ -19,11 +19,14 @@ class Redshift extends Writer implements WriterInterface
     /** @var \PDO */
     protected $db;
 
+    protected $async = true;
+
     public function createConnection($dbParams)
     {
         // convert errors to PDOExceptions
         $options = [
-            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            \PDO::ATTR_EMULATE_PREPARES => false
         ];
 
         // check params
@@ -84,44 +87,39 @@ class Redshift extends Writer implements WriterInterface
         $this->db->exec($sql);
     }
 
-    public function write($sourceFilename, $outputTableName, $table)
+    public function writeAsync($fileInfo, $table)
     {
-        $csv = new CsvFile($sourceFilename);
+		// Generate copy command
+		$command = "COPY \"{$table}\"";
 
-        $colNames = [];
-        foreach ($table['items'] as $item) {
-            if ($item['type'] != 'IGNORE') {
-                $colNames[] = $item['dbName'];
-            }
+		if (isset($fileInfo["isSliced"]) && $fileInfo["isSliced"] === true) {
+			$s3key = $fileInfo["s3Path"]["bucket"] . "/" . $fileInfo["s3Path"]["key"] . "manifest";
+		} else {
+			$s3key = $fileInfo["s3Path"]["bucket"] . "/" . $fileInfo["s3Path"]["key"];
+		}
+
+		$command .= " FROM 's3://{$s3key}'"
+			. " CREDENTIALS 'aws_access_key_id={$fileInfo["credentials"]["AccessKeyId"]};aws_secret_access_key={$fileInfo["credentials"]["SecretAccessKey"]};token={$fileInfo["credentials"]["SessionToken"]}'"
+			. " REGION AS 'us-east-1' DELIMITER ',' CSV QUOTE '\"'"
+            . " NULL AS 'NULL' ACCEPTANYDATE TRUNCATECOLUMNS";
+
+		// Sliced files use manifest and no header
+		if (isset($fileInfo["isSliced"]) && $fileInfo["isSliced"] === true) {
+			$command .= " MANIFEST";
+		} else {
+			$command .= " IGNOREHEADER 1";
+		}
+
+		$command .= " GZIP;";
+
+        try {
+            $this->db->exec($command);
+        } catch (\PDOException $e) {
+            throw new UserException("Query failed: " . $e->getMessage(), $e, [
+                'query' => $command
+            ]);
         }
 
-        $header = array_map(function ($item) {
-            return "\"$item\"";
-        }, $colNames);
-
-        $csv->getHeader();
-        $csv->next();
-
-        while ($csv->current() != null) {
-            $questionMarks = [];
-            $data = [];
-            for ($i=0; $i<1000 && $csv->current() != null; $i++) {
-                $questionMarks[] = sprintf('(%s)', $this->getPlaceholders($csv->current()));
-                $data = array_merge($data, $csv->current());
-                $csv->next();
-            }
-
-            $sql = sprintf("INSERT INTO \"{$outputTableName}\" (%s) VALUES %s;", implode(',', $header), implode(',', $questionMarks));
-
-            try {
-                $stmt = $this->db->prepare($sql);
-                $result = $stmt->execute($data);
-            } catch (\PDOException $e) {
-                throw new UserException("Query failed: " . $e->getMessage(), $e, [
-                    'query' => $sql
-                ]);
-            }
-        }
     }
 
     public function isTableValid(array $table)
@@ -175,4 +173,10 @@ class Redshift extends Writer implements WriterInterface
     {
         return static::$allowedTypes;
     }
+
+    public function write($sourceFilename, $outputTableName, $table)
+    {
+        throw new ApplicationException("Not implemented.");
+    }
+
 }

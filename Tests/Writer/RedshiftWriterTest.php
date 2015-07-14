@@ -93,7 +93,7 @@ class RedshiftWriterTest extends AbstractTest
         $encryptor = $this->container->get('syrup.encryptor');
 
         /** @var Executor $executor */
-        $executor = $this->container->get('wr_db.job_executor');
+        $executor = new Executor($this->componentName . "-" . $driver, $this->container->get('wr_db.writer_factory'), $this->container->get("logger"), $this->container->get("syrup.temp"));
 
         $executor->setStorageApi($this->storageApi);
 
