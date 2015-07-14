@@ -9,7 +9,6 @@ namespace Keboola\DbWriterBundle\Tests\Writer;
 
 use Keboola\DbWriterBundle\Job\Executor;
 use Keboola\DbWriterBundle\Test\AbstractTest;
-use Keboola\DbWriterBundle\Writer\ConfigurationFactory;
 use Keboola\Provisioning\Client;
 use Keboola\StorageApi\Table;
 use Keboola\Syrup\Encryption\Encryptor;
@@ -17,7 +16,6 @@ use Keboola\Syrup\Job\Metadata\Job;
 
 class RedshiftWriterTest extends AbstractTest
 {
-
     /**
      * @var Client Provisioning client
      */
@@ -37,8 +35,8 @@ class RedshiftWriterTest extends AbstractTest
 
     protected function tearDown()
     {
-        $credentials = $this->provisioningClient ->getCredentials("sandbox");
-        $this->provisioningClient ->dropCredentials($credentials["credentials"]["id"]);
+        $credentials = $this->provisioningClient->getCredentials("sandbox");
+        $this->provisioningClient->dropCredentials($credentials["credentials"]["id"]);
         parent::tearDown();
     }
 
@@ -55,6 +53,7 @@ class RedshiftWriterTest extends AbstractTest
 
         $pdo = new \PDO($dsn, $this->credentials["user"], $this->credentials["password"], $options);
         $tables = $pdo->query("SELECT tablename FROM PG_TABLES WHERE schemaname = '{$this->credentials["schema"]}';")->fetchAll();
+
         $this->assertEquals(array (
           0 =>
           array (
@@ -69,7 +68,7 @@ class RedshiftWriterTest extends AbstractTest
     protected function prepareConfig()
     {
         $writerData = $this->createWriter();
-        $provisioned = $this->provisioningClient ->getCredentials("sandbox");
+        $provisioned = $this->provisioningClient->getCredentials("sandbox");
         $credentials = [
             "driver" => "redshift",
             "host" => $provisioned["credentials"]["hostname"],
@@ -93,9 +92,8 @@ class RedshiftWriterTest extends AbstractTest
         /** @var Encryptor $encryptor */
         $encryptor = $this->container->get('syrup.encryptor');
 
-        $configurationFactory = new ConfigurationFactory($this->componentName . "-" . $driver, $driver);
         /** @var Executor $executor */
-        $executor = new Executor($configurationFactory, $this->container->get('wr_db.writer_factory'), $this->container->get("logger"), $this->container->get("syrup.temp"));
+        $executor = $this->container->get('wr_db.job_executor');
 
         $executor->setStorageApi($this->storageApi);
 

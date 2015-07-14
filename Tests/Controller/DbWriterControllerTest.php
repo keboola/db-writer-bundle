@@ -4,8 +4,6 @@ namespace Keboola\DbWriterBundle\Tests\Controller;
 
 use Keboola\DbWriterBundle\Test\AbstractTest;
 use Keboola\Syrup\Elasticsearch\JobMapper;
-use Keboola\Syrup\Job\Metadata\Job;
-use Keboola\Syrup\Service\StorageApi\StorageApiService;
 use Symfony\Component\HttpFoundation\Response;
 
 class DbWriterControllerTest extends AbstractTest
