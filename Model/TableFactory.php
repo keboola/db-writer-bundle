@@ -11,16 +11,16 @@ use Keboola\DbWriterBundle\Writer\Configuration;
 
 class TableFactory
 {
-	/** @var Configuration  */
-	protected $configuration;
+    /** @var Configuration */
+    protected $configuration;
 
-	public function __construct(Configuration $configuration)
-	{
-		$this->configuration = $configuration;
-	}
+    public function __construct(Configuration $configuration)
+    {
+        $this->configuration = $configuration;
+    }
 
-	public function get($writerId, $tableId)
-	{
-		return new Table($this->configuration, $writerId, $tableId);
-	}
+    public function get($writerId, $tableId)
+    {
+        return new Table($this->configuration, $writerId, $tableId);
+    }
 }

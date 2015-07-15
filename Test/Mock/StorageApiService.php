@@ -23,11 +23,12 @@ class StorageApiService extends \Keboola\Syrup\Service\StorageApi\StorageApiServ
                 $this->storageApiUrl = $this->request->headers->get('X-StorageApi-Url');
             }
 
-            $this->stub->__construct([
-                'token' => $this->request->headers->get('X-StorageApi-Token'),
-                'url' => $this->storageApiUrl,
-                'userAgent' => explode('/', $this->request->getPathInfo())[1],
-            ]);
+            $this->stub->__construct(
+                [
+                    'token' => $this->request->headers->get('X-StorageApi-Token'),
+                    'url' => $this->storageApiUrl,
+                    'userAgent' => explode('/', $this->request->getPathInfo())[1],
+                ]);
 
             $this->client = $this->stub;
 

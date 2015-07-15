@@ -11,9 +11,9 @@ use Keboola\Syrup\Exception\SyrupComponentException;
 
 class ConfigurationException extends SyrupComponentException
 {
-	public function __construct($message)
-	{
-		parent::__construct(400, "Wrong configuration: " . $message);
-	}
+    public function __construct($message)
+    {
+        parent::__construct(400, "Wrong configuration: " . $message);
+    }
 
 }

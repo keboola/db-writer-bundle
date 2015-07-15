@@ -11,8 +11,8 @@ use Keboola\Syrup\Exception\UserException;
 
 class DbException extends UserException
 {
-	public function __construct($message = null, \Exception $previous = null, $data = [])
-	{
-		parent::__construct($message, $previous, $data);
-	}
+    public function __construct($message = null, \Exception $previous = null, $data = [])
+    {
+        parent::__construct($message, $previous, $data);
+    }
 }

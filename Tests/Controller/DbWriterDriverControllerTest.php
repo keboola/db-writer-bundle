@@ -15,10 +15,10 @@ class DbWriterDriverControllerTest extends AbstractTest
 
     protected function mockSapiClientWithDriver()
     {
-        $indexActionResult = array (
+        $indexActionResult = [
             "components" => [
                 0 =>
-                    array (
+                    [
                         'id' => 'wr-db',
                         'type' => 'writer',
                         'name' => 'Database',
@@ -28,13 +28,13 @@ class DbWriterDriverControllerTest extends AbstractTest
                         'ico32' => '',
                         'ico64' => '',
                         'data' =>
-                            array (
-                            ),
+                            [
+                            ],
                         'uri' => 'https://syrup.keboola.com/wr-db',
                         'configurations' => []
-                    ),
+                    ],
                 1 =>
-                    array (
+                    [
                         'id' => 'wr-db-mysql',
                         'type' => 'writer',
                         'name' => 'Database',
@@ -44,13 +44,13 @@ class DbWriterDriverControllerTest extends AbstractTest
                         'ico32' => '',
                         'ico64' => '',
                         'data' =>
-                            array (
-                            ),
+                            [
+                            ],
                         'uri' => 'https://syrup.keboola.com/wr-db/mysql',
                         'configurations' => []
-                    ),
+                    ],
             ]
-        );
+        ];
         $sapiStub = $this->getMockBuilder("\\Keboola\\StorageApi\\Client")
             ->disableOriginalConstructor()
             ->setMethods(["indexAction"])
@@ -62,24 +62,28 @@ class DbWriterDriverControllerTest extends AbstractTest
 
         $serviceMock = new \Keboola\DbWriterBundle\Test\Mock\StorageApiService();
         $serviceMock->setStorageApiStub($sapiStub);
-        static::$kernel->getContainer()->set("syrup.storage_api", $serviceMock);
+        static::$kernel->getContainer()
+            ->set("syrup.storage_api", $serviceMock);
     }
 
     public function testPostWriterDriverAction()
     {
         $this->mockSapiClientWithDriver();
         self::$client->request(
-            'POST', $this->componentName . '/mysql/configs',
+            'POST',
+            $this->componentName . '/mysql/configs',
             [],
             [],
             [],
-            json_encode([
-                'name' => $this->writerId,
-                'description' => 'Test Account created by PhpUnit'
-            ])
+            json_encode(
+                [
+                    'name' => $this->writerId,
+                    'description' => 'Test Account created by PhpUnit'
+                ])
         );
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals('test', $response['id']);
@@ -92,7 +96,8 @@ class DbWriterDriverControllerTest extends AbstractTest
 
         self::$client->request('GET', $this->componentName . '/aabb/configs');
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
         $this->assertEquals($response["message"], "User error: Driver 'aabb' not found.");
     }
@@ -104,7 +109,8 @@ class DbWriterDriverControllerTest extends AbstractTest
 
         self::$client->request('GET', $this->componentName . '/mysql/configs');
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals('test', $response[0]['id']);
@@ -118,7 +124,8 @@ class DbWriterDriverControllerTest extends AbstractTest
 
         self::$client->request('GET', $this->componentName . '/mysql/configs/' . $this->writerId);
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals('test', $response['id']);
@@ -151,14 +158,16 @@ class DbWriterDriverControllerTest extends AbstractTest
         $testing = $this->container->getParameter('testing');
 
         self::$client->request(
-            'POST', $this->componentName . '/mysql/' . $this->writerId . '/credentials',
+            'POST',
+            $this->componentName . '/mysql/' . $this->writerId . '/credentials',
             [],
             [],
             [],
             json_encode($testing['mysql']['db'])
         );
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals($this->writerId, $response['writerId']);
@@ -187,7 +196,8 @@ class DbWriterDriverControllerTest extends AbstractTest
 
         self::$client->request('GET', $this->componentName . '/mysql/' . $this->writerId . '/credentials');
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $credentials = json_decode($responseJson, true);
 
         $this->assertArrayHasKey('host', $credentials);
@@ -214,14 +224,16 @@ class DbWriterDriverControllerTest extends AbstractTest
         $testing = $this->container->getParameter('testing');
 
         self::$client->request(
-            'POST', $this->componentName . '/mysql/' . $this->writerId . '/tables/' . $testing['table']['id'],
+            'POST',
+            $this->componentName . '/mysql/' . $this->writerId . '/tables/' . $testing['table']['id'],
             [],
             [],
             [],
             json_encode($testing['table'])
         );
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals($this->writerId, $response['writerId']);
@@ -244,7 +256,8 @@ class DbWriterDriverControllerTest extends AbstractTest
             $this->componentName . '/mysql/' . $this->writerId . '/tables/' . $testing['table']['id']
         );
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals($testing['table']['id'], $response['id']);
@@ -279,7 +292,9 @@ class DbWriterDriverControllerTest extends AbstractTest
             json_encode($testing['columns'])
         );
 
-        $this->assertEquals(200, self::$client->getResponse()->getStatusCode());
+        $this->assertEquals(200,
+            self::$client->getResponse()
+                ->getStatusCode());
     }
 
 }

@@ -12,17 +12,20 @@ class DbWriterControllerTest extends AbstractTest
     public function testPostWriterAction()
     {
         self::$client->request(
-            'POST', $this->componentName . '/configs',
+            'POST',
+            $this->componentName . '/configs',
             [],
             [],
             [],
-            json_encode([
-                'name' => $this->writerId,
-                'description' => 'Test Account created by PhpUnit'
-            ])
+            json_encode(
+                [
+                    'name' => $this->writerId,
+                    'description' => 'Test Account created by PhpUnit'
+                ])
         );
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals('test', $response['id']);
@@ -35,7 +38,8 @@ class DbWriterControllerTest extends AbstractTest
 
         self::$client->request('GET', $this->componentName . '/configs');
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals('test', $response[0]['id']);
@@ -44,7 +48,8 @@ class DbWriterControllerTest extends AbstractTest
         self::$client->restart();
         self::$client->request('GET', $this->componentName . '/configs/' . $this->writerId);
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals('test', $response['id']);
@@ -76,14 +81,16 @@ class DbWriterControllerTest extends AbstractTest
         $testing = $this->container->getParameter('testing');
 
         self::$client->request(
-            'POST', $this->componentName . '/' . $this->writerId . '/credentials',
+            'POST',
+            $this->componentName . '/' . $this->writerId . '/credentials',
             [],
             [],
             [],
             json_encode($testing['mysql']['db'])
         );
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals($this->writerId, $response['writerId']);
@@ -111,7 +118,8 @@ class DbWriterControllerTest extends AbstractTest
 
         self::$client->request('GET', $this->componentName . '/' . $this->writerId . '/credentials');
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $credentials = json_decode($responseJson, true);
 
         $this->assertArrayHasKey('host', $credentials);
@@ -137,14 +145,16 @@ class DbWriterControllerTest extends AbstractTest
         $testing = $this->container->getParameter('testing');
 
         self::$client->request(
-            'POST', $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id'],
+            'POST',
+            $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id'],
             [],
             [],
             [],
             json_encode($testing['table'])
         );
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals($this->writerId, $response['writerId']);
@@ -166,7 +176,8 @@ class DbWriterControllerTest extends AbstractTest
             $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id']
         );
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertEquals($testing['table']['id'], $response['id']);
@@ -201,7 +212,9 @@ class DbWriterControllerTest extends AbstractTest
             json_encode($testing['columns'])
         );
 
-        $this->assertEquals(200, self::$client->getResponse()->getStatusCode());
+        $this->assertEquals(200,
+            self::$client->getResponse()
+                ->getStatusCode());
     }
 
     /** Jobs */
@@ -222,17 +235,21 @@ class DbWriterControllerTest extends AbstractTest
             $this->componentName . '/' . $this->writerId . '/jobs'
         );
 
-        $responseJson = self::$client->getResponse()->getContent();
+        $responseJson = self::$client->getResponse()
+            ->getContent();
         $response = json_decode($responseJson, true);
 
         $this->assertNotEmpty($response);
-        $this->assertEquals(200, self::$client->getResponse()->getStatusCode());
+        $this->assertEquals(200,
+            self::$client->getResponse()
+                ->getStatusCode());
     }
 
     protected function createJob($command, $params)
     {
         $jobFactory = $this->container->get('syrup.job_factory');
         $jobFactory->setStorageApiClient($this->storageApi);
+
         return $jobFactory->create($command, $params);
     }
 }

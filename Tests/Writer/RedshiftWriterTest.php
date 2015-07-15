@@ -26,7 +26,8 @@ class RedshiftWriterTest extends AbstractTest
      */
     protected $credentials;
 
-    protected function setUp() {
+    protected function setUp()
+    {
         parent::setUp("redshift");
         $token = $this->container->getParameter("storage_api.test.token");
         $this->provisioningClient = new Client("redshift", $token, 'testing');
@@ -52,16 +53,20 @@ class RedshiftWriterTest extends AbstractTest
         ];
 
         $pdo = new \PDO($dsn, $this->credentials["user"], $this->credentials["password"], $options);
-        $tables = $pdo->query("SELECT tablename FROM PG_TABLES WHERE schemaname = '{$this->credentials["schema"]}';")->fetchAll();
+        $tables = $pdo->query("SELECT tablename FROM PG_TABLES WHERE schemaname = '{$this->credentials["schema"]}';")
+            ->fetchAll();
 
-        $this->assertEquals(array (
-          0 =>
-          array (
-            'tablename' => 'dummy',
-            0 => 'dummy',
-          ),
-        ), $tables);
-        $rows = $pdo->query("SELECT COUNT(*) AS rows FROM dummy;")->fetchColumn(0);
+        $this->assertEquals(
+            [
+                0 =>
+                    [
+                        'tablename' => 'dummy',
+                        0 => 'dummy',
+                    ],
+            ],
+            $tables);
+        $rows = $pdo->query("SELECT COUNT(*) AS rows FROM dummy;")
+            ->fetchColumn(0);
         $this->assertEquals(4, $rows);
     }
 
@@ -82,6 +87,7 @@ class RedshiftWriterTest extends AbstractTest
         $this->configuration->setCredentials($this->writerId, $credentials);
         $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
         $this->configuration->updateTableColumns($this->writerId, $testing['table']['id'], $testing['columns']);
+
         return $writerData;
     }
 
@@ -93,32 +99,38 @@ class RedshiftWriterTest extends AbstractTest
         $encryptor = $this->container->get('syrup.encryptor');
 
         /** @var Executor $executor */
-        $executor = new Executor($this->componentName . "-" . $driver, $this->container->get('wr_db.writer_factory'), $this->container->get("logger"), $this->container->get("syrup.temp"));
+        $executor = new Executor(
+            $this->componentName . "-" . $driver,
+            $this->container->get('wr_db.writer_factory'),
+            $this->container->get("logger"),
+            $this->container->get("syrup.temp"));
 
         $executor->setStorageApi($this->storageApi);
 
-        $executor->execute(new Job([
-            'id'          => $this->storageApi->generateId(),
-            'runId'       => $this->storageApi->generateId(),
-            'project'     => [
-                'id'   => $tokenData['owner']['id'],
-                'name' => $tokenData['owner']['name']
-            ],
-            'token'       => [
-                'id'          => $tokenData['id'],
-                'description' => $tokenData['description'],
-                'token'       => $encryptor->encrypt($this->storageApi->getTokenString())
-            ],
-            'component'   => $this->componentName . "-" . $driver,
-            'command'     => 'run',
-            'params'      => [
-                'writer' => $writerId
-            ],
-            'process'     => [
-                'host' => gethostname(),
-                'pid'  => getmypid()
-            ],
-            'createdTime' => date('c')
-        ]));
+        $executor->execute(
+            new Job(
+                [
+                    'id' => $this->storageApi->generateId(),
+                    'runId' => $this->storageApi->generateId(),
+                    'project' => [
+                        'id' => $tokenData['owner']['id'],
+                        'name' => $tokenData['owner']['name']
+                    ],
+                    'token' => [
+                        'id' => $tokenData['id'],
+                        'description' => $tokenData['description'],
+                        'token' => $encryptor->encrypt($this->storageApi->getTokenString())
+                    ],
+                    'component' => $this->componentName . "-" . $driver,
+                    'command' => 'run',
+                    'params' => [
+                        'writer' => $writerId
+                    ],
+                    'process' => [
+                        'host' => gethostname(),
+                        'pid' => getmypid()
+                    ],
+                    'createdTime' => date('c')
+                ]));
     }
 }

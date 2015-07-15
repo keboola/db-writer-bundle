@@ -40,6 +40,7 @@ class Oracle extends Writer implements WriterInterface
     {
         $this->dbParams = $dbParams;
         $dbString = '//' . $dbParams['host'] . ':' . $dbParams['port'] . '/' . $dbParams['database'];
+
         return oci_connect($dbParams['user'], $dbParams['password'], $dbString, 'AL32UTF8');
     }
 
@@ -58,20 +59,24 @@ class Oracle extends Writer implements WriterInterface
         $csv->next();
 
         while ($csv->current() != null) {
-            for ($i=0; $i<1000 && $csv->current() != null; $i++) {
+            for ($i = 0; $i < 1000 && $csv->current() != null; $i++) {
 
                 $cols = [];
                 foreach ($csv->current() as $col) {
                     $cols[] = "'" . $col . "'";
                 }
 
-                $sql = sprintf("INSERT INTO {$outputTableName} (%s) VALUES (%s)", implode(',', $header), implode(',', $cols));
+                $sql = sprintf(
+                    "INSERT INTO {$outputTableName} (%s) VALUES (%s)",
+                    implode(',', $header),
+                    implode(',', $cols));
 
                 try {
                     $stmt = oci_parse($this->db, $sql);
                     oci_execute($stmt);
                 } catch (\Exception $e) {
-                    throw new UserException("Query failed: " . $e->getMessage(), $e, [
+                    throw new UserException(
+                        "Query failed: " . $e->getMessage(), $e, [
                         'query' => $sql
                     ]);
                 }
@@ -95,8 +100,7 @@ class Oracle extends Writer implements WriterInterface
             return false;
         }
 
-        if (!isset($table['export']) || $table['export'] == false)
-        {
+        if (!isset($table['export']) || $table['export'] == false) {
             return false;
         }
 
@@ -139,9 +143,9 @@ class Oracle extends Writer implements WriterInterface
                 $type .= "({$col['size']})";
             }
 
-            $null = $col['null']?'NULL':'NOT NULL';
+            $null = $col['null'] ? 'NULL' : 'NOT NULL';
 
-            $default = empty($col['default'])?'':$col['default'];
+            $default = empty($col['default']) ? '' : $col['default'];
             if ($type == 'TEXT') {
                 $default = '';
             }

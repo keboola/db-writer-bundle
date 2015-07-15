@@ -39,13 +39,16 @@ class Redshift extends Writer implements WriterInterface
         $port = isset($dbParams['port']) ? $dbParams['port'] : '5439';
         $dsn = "pgsql:host={$dbParams['host']};port={$port};dbname={$dbParams["database"]}";
 
-        $this->logger->info("Connecting to DSN '" . $dsn . "'...", [
-            'options' => $options
-        ]);
+        $this->logger->info(
+            "Connecting to DSN '" . $dsn . "'...",
+            [
+                'options' => $options
+            ]);
 
         $pdo = new \PDO($dsn, $dbParams['user'], $dbParams['password'], $options);
         $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         $pdo->exec("SET search_path TO \"{$dbParams["schema"]}\";");
+
         return $pdo;
     }
 
@@ -70,9 +73,9 @@ class Redshift extends Writer implements WriterInterface
                 $type .= "({$col['size']})";
             }
 
-            $null = $col['null']?'NULL':'NOT NULL';
+            $null = $col['null'] ? 'NULL' : 'NOT NULL';
 
-            $default = empty($col['default'])?'':$col['default'];
+            $default = empty($col['default']) ? '' : $col['default'];
             if ($type == 'TEXT') {
                 $default = '';
             }
@@ -89,33 +92,34 @@ class Redshift extends Writer implements WriterInterface
 
     public function writeAsync($fileInfo, $table)
     {
-		// Generate copy command
-		$command = "COPY \"{$table}\"";
+        // Generate copy command
+        $command = "COPY \"{$table}\"";
 
-		if (isset($fileInfo["isSliced"]) && $fileInfo["isSliced"] === true) {
-			$s3key = $fileInfo["s3Path"]["bucket"] . "/" . $fileInfo["s3Path"]["key"] . "manifest";
-		} else {
-			$s3key = $fileInfo["s3Path"]["bucket"] . "/" . $fileInfo["s3Path"]["key"];
-		}
+        if (isset($fileInfo["isSliced"]) && $fileInfo["isSliced"] === true) {
+            $s3key = $fileInfo["s3Path"]["bucket"] . "/" . $fileInfo["s3Path"]["key"] . "manifest";
+        } else {
+            $s3key = $fileInfo["s3Path"]["bucket"] . "/" . $fileInfo["s3Path"]["key"];
+        }
 
-		$command .= " FROM 's3://{$s3key}'"
-			. " CREDENTIALS 'aws_access_key_id={$fileInfo["credentials"]["AccessKeyId"]};aws_secret_access_key={$fileInfo["credentials"]["SecretAccessKey"]};token={$fileInfo["credentials"]["SessionToken"]}'"
-			. " REGION AS 'us-east-1' DELIMITER ',' CSV QUOTE '\"'"
+        $command .= " FROM 's3://{$s3key}'"
+            . " CREDENTIALS 'aws_access_key_id={$fileInfo["credentials"]["AccessKeyId"]};aws_secret_access_key={$fileInfo["credentials"]["SecretAccessKey"]};token={$fileInfo["credentials"]["SessionToken"]}'"
+            . " REGION AS 'us-east-1' DELIMITER ',' CSV QUOTE '\"'"
             . " NULL AS 'NULL' ACCEPTANYDATE TRUNCATECOLUMNS";
 
-		// Sliced files use manifest and no header
-		if (isset($fileInfo["isSliced"]) && $fileInfo["isSliced"] === true) {
-			$command .= " MANIFEST";
-		} else {
-			$command .= " IGNOREHEADER 1";
-		}
+        // Sliced files use manifest and no header
+        if (isset($fileInfo["isSliced"]) && $fileInfo["isSliced"] === true) {
+            $command .= " MANIFEST";
+        } else {
+            $command .= " IGNOREHEADER 1";
+        }
 
-		$command .= " GZIP;";
+        $command .= " GZIP;";
 
         try {
             $this->db->exec($command);
         } catch (\PDOException $e) {
-            throw new UserException("Query failed: " . $e->getMessage(), $e, [
+            throw new UserException(
+                "Query failed: " . $e->getMessage(), $e, [
                 'query' => $command
             ]);
         }
@@ -136,8 +140,7 @@ class Redshift extends Writer implements WriterInterface
             return false;
         }
 
-        if (!isset($table['export']) || $table['export'] == false)
-        {
+        if (!isset($table['export']) || $table['export'] == false) {
             return false;
         }
 
@@ -161,6 +164,7 @@ class Redshift extends Writer implements WriterInterface
         foreach ($row as $r) {
             $result[] = '?';
         }
+
         return implode(',', $result);
     }
 

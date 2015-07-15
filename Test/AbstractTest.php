@@ -39,15 +39,17 @@ class AbstractTest extends WebTestCase
         $sapiToken = $this->container->getParameter('storage_api.test.token');
         $sapiUrl = $this->container->getParameter('storage_api.test.url');
 
-        self::$client->setServerParameters([
-            'HTTP_X-StorageApi-Token' => $sapiToken
-        ]);
+        self::$client->setServerParameters(
+            [
+                'HTTP_X-StorageApi-Token' => $sapiToken
+            ]);
 
-        $this->storageApi = new SapiClient([
-            'token'     => $sapiToken,
-            'url'       => $sapiUrl,
-            'userAgent' => $this->componentName
-        ]);
+        $this->storageApi = new SapiClient(
+            [
+                'token' => $sapiToken,
+                'url' => $sapiUrl,
+                'userAgent' => $this->componentName
+            ]);
 
         if ($driver != null) {
             $this->configuration = new Configuration($this->componentName . '-' . $driver, $this->storageApi, $driver);

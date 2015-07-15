@@ -39,9 +39,11 @@ class MySQL extends Writer implements WriterInterface
         $port = isset($dbParams['port']) ? $dbParams['port'] : '3306';
         $dsn = sprintf("mysql:host=%s;port=%s;dbname=%s;charset=utf8", $dbParams['host'], $port, $dbParams['database']);
 
-        $this->logger->info("Connecting to DSN '" . $dsn . "'...", [
-            'options' => $options
-        ]);
+        $this->logger->info(
+            "Connecting to DSN '" . $dsn . "'...",
+            [
+                'options' => $options
+            ]);
 
         $pdo = new \PDO($dsn, $dbParams['user'], $dbParams['password'], $options);
         $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
@@ -71,9 +73,9 @@ class MySQL extends Writer implements WriterInterface
                 $type .= "({$col['size']})";
             }
 
-            $null = $col['null']?'NULL':'NOT NULL';
+            $null = $col['null'] ? 'NULL' : 'NOT NULL';
 
-            $default = empty($col['default'])?'':$col['default'];
+            $default = empty($col['default']) ? '' : $col['default'];
             if ($type == 'TEXT') {
                 $default = '';
             }
@@ -99,9 +101,11 @@ class MySQL extends Writer implements WriterInterface
             }
         }
 
-        $header = array_map(function ($item) {
-            return "`$item`";
-        }, $colNames);
+        $header = array_map(
+            function ($item) {
+                return "`$item`";
+            },
+            $colNames);
 
         $csv->getHeader();
         $csv->next();
@@ -109,19 +113,23 @@ class MySQL extends Writer implements WriterInterface
         while ($csv->current() != null) {
             $questionMarks = [];
             $data = [];
-            for ($i=0; $i<1000 && $csv->current() != null; $i++) {
+            for ($i = 0; $i < 1000 && $csv->current() != null; $i++) {
                 $questionMarks[] = sprintf('(%s)', $this->getPlaceholders($csv->current()));
                 $data = array_merge($data, $csv->current());
                 $csv->next();
             }
 
-            $sql = sprintf("INSERT INTO `$outputTableName` (%s) VALUES %s;", implode(',', $header), implode(',', $questionMarks));
+            $sql = sprintf(
+                "INSERT INTO `$outputTableName` (%s) VALUES %s;",
+                implode(',', $header),
+                implode(',', $questionMarks));
 
             try {
                 $stmt = $this->db->prepare($sql);
                 $result = $stmt->execute($data);
             } catch (\PDOException $e) {
-                throw new UserException("Query failed: " . $e->getMessage(), $e, [
+                throw new UserException(
+                    "Query failed: " . $e->getMessage(), $e, [
                     'query' => $sql
                 ]);
             }
@@ -142,8 +150,7 @@ class MySQL extends Writer implements WriterInterface
             return false;
         }
 
-        if (!isset($table['export']) || $table['export'] == false)
-        {
+        if (!isset($table['export']) || $table['export'] == false) {
             return false;
         }
 
@@ -167,6 +174,7 @@ class MySQL extends Writer implements WriterInterface
         foreach ($row as $r) {
             $result[] = '?';
         }
+
         return implode(',', $result);
     }
 

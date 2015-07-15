@@ -20,13 +20,17 @@ class WriterTest extends AbstractTest
         $writerData = $this->prepareConfig('mysql');
         $this->write($writerData['id']);
     }
+
     public function testRunOracle()
     {
         $writerData = $this->prepareConfig('oracle');
         $testing = $this->container->getParameter('testing');
-        $this->configuration->updateTable($this->writerId, $testing['table']['id'], [
-            'dbName' => 'keboola.dummy'
-        ]);
+        $this->configuration->updateTable(
+            $this->writerId,
+            $testing['table']['id'],
+            [
+                'dbName' => 'keboola.dummy'
+            ]);
 
         $dbParams = $testing['oracle']['db'];
         $dbString = '//' . $dbParams['host'] . ':' . $dbParams['port'] . '/' . $dbParams['database'];
@@ -83,28 +87,30 @@ class WriterTest extends AbstractTest
 
         $executor->setStorageApi($this->storageApi);
 
-        $executor->execute(new Job([
-            'id'          => $this->storageApi->generateId(),
-            'runId'       => $this->storageApi->generateId(),
-            'project'     => [
-                'id'   => $tokenData['owner']['id'],
-                'name' => $tokenData['owner']['name']
-            ],
-            'token'       => [
-                'id'          => $tokenData['id'],
-                'description' => $tokenData['description'],
-                'token'       => $encryptor->encrypt($this->storageApi->getTokenString())
-            ],
-            'component'   => $this->componentName,
-            'command'     => 'run',
-            'params'      => [
-                'writer' => $writerId
-            ],
-            'process'     => [
-                'host' => gethostname(),
-                'pid'  => getmypid()
-            ],
-            'createdTime' => date('c')
-        ]));
+        $executor->execute(
+            new Job(
+                [
+                    'id' => $this->storageApi->generateId(),
+                    'runId' => $this->storageApi->generateId(),
+                    'project' => [
+                        'id' => $tokenData['owner']['id'],
+                        'name' => $tokenData['owner']['name']
+                    ],
+                    'token' => [
+                        'id' => $tokenData['id'],
+                        'description' => $tokenData['description'],
+                        'token' => $encryptor->encrypt($this->storageApi->getTokenString())
+                    ],
+                    'component' => $this->componentName,
+                    'command' => 'run',
+                    'params' => [
+                        'writer' => $writerId
+                    ],
+                    'process' => [
+                        'host' => gethostname(),
+                        'pid' => getmypid()
+                    ],
+                    'createdTime' => date('c')
+                ]));
     }
 }

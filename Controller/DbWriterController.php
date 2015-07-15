@@ -18,24 +18,24 @@ class DbWriterController extends ApiController
 {
     protected $driver = 'generic';
 
-	/** @return Configuration */
-	protected function getConfiguration()
-	{
+    /** @return Configuration */
+    protected function getConfiguration()
+    {
         return new Configuration($this->componentName, $this->storageApi, $this->driver);
-	}
+    }
 
     /**
      * @param $required
      * @param $params
      */
-	protected function checkParams($required, $params)
-	{
-		foreach ($required as $r) {
-			if (!isset($params[$r])) {
-				throw new ParameterMissingException(sprintf("Parameter %s is missing.", $r));
-			}
-		}
-	}
+    protected function checkParams($required, $params)
+    {
+        foreach ($required as $r) {
+            if (!isset($params[$r])) {
+                throw new ParameterMissingException(sprintf("Parameter %s is missing.", $r));
+            }
+        }
+    }
 
     /**
      * @return JobMapper
@@ -65,7 +65,6 @@ class DbWriterController extends ApiController
 
     /**
      * Make sure that a given KBC component is valid.
-     *
      * @param string $componentName KBC Component name.
      * @throw UserException in case of invalid component.
      */
@@ -104,9 +103,8 @@ class DbWriterController extends ApiController
 
     /**
      * Override for custom component
-     *
      * @param Request $request
-     * @param string $driver
+     * @param string  $driver
      * @return JsonResponse
      * @throws ApplicationException
      */
@@ -141,110 +139,134 @@ class DbWriterController extends ApiController
         }
         $messageId = $this->enqueue($jobId, $queueName);
 
-        $this->logger->info('Job created', [
-            'sqsQueue' => $queueName,
-            'sqsMessageId' => $messageId,
-            'job' => $job->getLogData()
-        ]);
+        $this->logger->info(
+            'Job created',
+            [
+                'sqsQueue' => $queueName,
+                'sqsMessageId' => $messageId,
+                'job' => $job->getLogData()
+            ]);
 
         // Response with link to job resource
-        return $this->createJsonResponse([
-            'id'        => $jobId,
-            'url'       => $this->getJobUrl($jobId),
-            'status'    => $job->getStatus()
-        ], 202);
+        return $this->createJsonResponse(
+            [
+                'id' => $jobId,
+                'url' => $this->getJobUrl($jobId),
+                'status' => $job->getStatus()
+            ],
+            202);
     }
 
 
-	/** Writers */
+    /** Writers */
 
     /**
      * @param Request $request
      * @return JsonResponse
      */
-	public function postWriterAction(Request $request)
-	{
-		$params = $this->getPostJson($request);
-		$this->checkParams([
-			'name'
-		], $params);
+    public function postWriterAction(Request $request)
+    {
+        $params = $this->getPostJson($request);
+        $this->checkParams(
+            [
+                'name'
+            ],
+            $params);
 
-		$description = isset($params['description'])?$params['description']:'DB Writer configuration bucket';
+        $description = isset($params['description']) ? $params['description'] : 'DB Writer configuration bucket';
 
-		return $this->createJsonResponse(
-            $this->getConfiguration()->createWriter($params['name'], $description)
+        return $this->createJsonResponse(
+            $this->getConfiguration()
+                ->createWriter($params['name'], $description)
         );
-	}
+    }
 
     /**
      * @param null $id
      * @return JsonResponse
      */
-	public function getWritersAction($id = null)
-	{
-		if ($id != null) {
-			return $this->createJsonResponse($this->getConfiguration()->getWriter($id));
-		}
-		return $this->createJsonResponse($this->getConfiguration()->getWriters());
-	}
+    public function getWritersAction($id = null)
+    {
+        if ($id != null) {
+            return $this->createJsonResponse(
+                $this->getConfiguration()
+                    ->getWriter($id));
+        }
+
+        return $this->createJsonResponse(
+            $this->getConfiguration()
+                ->getWriters());
+    }
 
     /**
      * @param $id
      * @return JsonResponse
      */
-	public function deleteWritersAction($id)
-	{
-		$this->getConfiguration()->deleteWriter($id);
-		return $this->createJsonResponse([], 204);
-	}
+    public function deleteWritersAction($id)
+    {
+        $this->getConfiguration()
+            ->deleteWriter($id);
+
+        return $this->createJsonResponse([], 204);
+    }
 
 
-	/** Credentials */
+    /** Credentials */
 
     /**
      * @param         $writerId
      * @param Request $request
      * @return JsonResponse
      */
-	public function postCredentialsAction($writerId, Request $request)
-	{
-		$params = $this->getPostJson($request);
-		$this->checkParams([
-			'host', 'port', 'database', 'user', 'password'
-		], $params);
+    public function postCredentialsAction($writerId, Request $request)
+    {
+        $params = $this->getPostJson($request);
+        $this->checkParams(
+            [
+                'host', 'port', 'database', 'user', 'password'
+            ],
+            $params);
 
-		$this->getConfiguration()->setCredentials($writerId, $params);
+        $this->getConfiguration()
+            ->setCredentials($writerId, $params);
 
-		return $this->createJsonResponse([
-			'writerId'  => $writerId
-		]);
-	}
+        return $this->createJsonResponse(
+            [
+                'writerId' => $writerId
+            ]);
+    }
 
     /**
      * @param $writerId
      * @return JsonResponse
      */
-	public function getCredentialsAction($writerId)
-	{
-		return $this->createJsonResponse($this->getConfiguration()->getCredentials($writerId));
-	}
+    public function getCredentialsAction($writerId)
+    {
+        return $this->createJsonResponse(
+            $this->getConfiguration()
+                ->getCredentials($writerId));
+    }
 
 
-	/** Tables */
+    /** Tables */
 
     /**
      * @param      $writerId
      * @param null $id
      * @return JsonResponse
      */
-	public function getTablesAction($writerId, $id = null)
-	{
-		if ($id == null) {
-			return $this->createJsonResponse($this->getConfiguration()->getTables($writerId));
-		}
+    public function getTablesAction($writerId, $id = null)
+    {
+        if ($id == null) {
+            return $this->createJsonResponse(
+                $this->getConfiguration()
+                    ->getTables($writerId));
+        }
 
-		return $this->createJsonResponse($this->getConfiguration()->getTable($writerId, $id));
-	}
+        return $this->createJsonResponse(
+            $this->getConfiguration()
+                ->getTable($writerId, $id));
+    }
 
     /**
      * @param         $writerId
@@ -252,21 +274,25 @@ class DbWriterController extends ApiController
      * @param Request $request
      * @return JsonResponse
      */
-	public function postTableAction($writerId, $id, Request $request)
-	{
-		$params = $this->getPostJson($request);
-		$this->checkParams([
-			'dbName',
-			'export'
-		], $params);
+    public function postTableAction($writerId, $id, Request $request)
+    {
+        $params = $this->getPostJson($request);
+        $this->checkParams(
+            [
+                'dbName',
+                'export'
+            ],
+            $params);
 
-		$sysTableId = $this->getConfiguration()->updateTable($writerId, $id, $params);
+        $sysTableId = $this->getConfiguration()
+            ->updateTable($writerId, $id, $params);
 
-		return $this->createJsonResponse([
-			'writerId'  => $writerId,
-			'tableId'   => $sysTableId
-		]);
-	}
+        return $this->createJsonResponse(
+            [
+                'writerId' => $writerId,
+                'tableId' => $sysTableId
+            ]);
+    }
 
     /**
      * @param         $writerId
@@ -274,87 +300,98 @@ class DbWriterController extends ApiController
      * @param Request $request
      * @return JsonResponse
      */
-	public function postColumnsAction($writerId, $tableId, Request $request)
-	{
-		$params = $this->getPostJson($request);
+    public function postColumnsAction($writerId, $tableId, Request $request)
+    {
+        $params = $this->getPostJson($request);
 
-		if (!is_array($params)) {
-			throw new ParameterMissingException("Payload must be an array of columns");
-		}
+        if (!is_array($params)) {
+            throw new ParameterMissingException("Payload must be an array of columns");
+        }
 
-		foreach ($params as $param) {
-			$this->checkParams([
-				'name', 'dbName', 'type', 'size', 'null', 'default'
-			], $param);
-		}
+        foreach ($params as $param) {
+            $this->checkParams(
+                [
+                    'name', 'dbName', 'type', 'size', 'null', 'default'
+                ],
+                $param);
+        }
 
-		$sysTableId = $this->getConfiguration()->updateTableColumns($writerId, $tableId, $params);
+        $sysTableId = $this->getConfiguration()
+            ->updateTableColumns($writerId, $tableId, $params);
 
-		return $this->createJsonResponse([
-			'writerId'  => $writerId,
-			'tableId'   => $sysTableId
-		]);
-	}
+        return $this->createJsonResponse(
+            [
+                'writerId' => $writerId,
+                'tableId' => $sysTableId
+            ]);
+    }
 
-	/** Jobs */
+    /** Jobs */
 
     /**
      * @param Request $request
      * @return JsonResponse
      */
-	public function getJobsAction(Request $request)
-	{
-		$params = $request->query->all();
+    public function getJobsAction(Request $request)
+    {
+        $params = $request->query->all();
 
-		$runId = isset($params['runId'])?$params['runId']:null;
-		$query = isset($params['q'])?$params['q']:null;
-		$offset = isset($params['offset'])?$params['offset']:0;
-		$limit = isset($params['limit'])?$params['limit']:100;
+        $runId = isset($params['runId']) ? $params['runId'] : null;
+        $query = isset($params['q']) ? $params['q'] : null;
+        $offset = isset($params['offset']) ? $params['offset'] : 0;
+        $limit = isset($params['limit']) ? $params['limit'] : 100;
 
-		$sapiData = $this->storageApi->getLogData();
-		$projectId = $sapiData['owner']['id'];
+        $sapiData = $this->storageApi->getLogData();
+        $projectId = $sapiData['owner']['id'];
 
-		$jobs = $this->getElasticSearch()->getJobs([
-            'component' => $this->getParameter("app_name"),
-            'runId' => $runId,
-            'query' => $query,
-            'projectId' => $projectId,
-            'offset' => $offset,
-            'limit' => $limit
-        ]);
+        $jobs = $this->getElasticSearch()
+            ->getJobs(
+                [
+                    'component' => $this->getParameter("app_name"),
+                    'runId' => $runId,
+                    'query' => $query,
+                    'projectId' => $projectId,
+                    'offset' => $offset,
+                    'limit' => $limit
+                ]);
 
-		$jobs = array_map(function ($item) {
-			unset($item['token']['token']);
-			return $item;
-		}, $jobs);
+        $jobs = array_map(
+            function ($item) {
+                unset($item['token']['token']);
 
-		return $this->createJsonResponse($jobs);
-	}
+                return $item;
+            },
+            $jobs);
+
+        return $this->createJsonResponse($jobs);
+    }
 
     /**
      * @param $writerId
      * @return JsonResponse
      */
-	public function cancelWaitingJobsAction($writerId)
-	{
-		$sapiData = $this->storageApi->getLogData();
-		$projectId = $sapiData['owner']['id'];
+    public function cancelWaitingJobsAction($writerId)
+    {
+        $sapiData = $this->storageApi->getLogData();
+        $projectId = $sapiData['owner']['id'];
 
-		$query="(status:waiting)AND(writer:$writerId)";
+        $query = "(status:waiting)AND(writer:$writerId)";
 
-		$jobs = $this->getElasticSearch()->getJobs([
-            'projectId' => $projectId,
-            'component' => $this->getParameter("app_name"),
-            'query' => $query
-        ]);
+        $jobs = $this->getElasticSearch()
+            ->getJobs(
+                [
+                    'projectId' => $projectId,
+                    'component' => $this->getParameter("app_name"),
+                    'query' => $query
+                ]);
 
         $jobMapper = $this->getJobMapper();
-		foreach ($jobs as $item) {
-			$job = new Job($item);
-			$job->setStatus(Job::STATUS_CANCELLED);
+        foreach ($jobs as $item) {
+            $job = new Job($item);
+            $job->setStatus(Job::STATUS_CANCELLED);
             $jobMapper->update($job);
-		}
+        }
 
-		return $this->createJsonResponse([]);
-	}
+        return $this->createJsonResponse([]);
+    }
 }

@@ -21,21 +21,21 @@ use Keboola\Syrup\Job\Metadata\Job;
 
 class Executor extends BaseExecutor
 {
-	protected $componentName;
+    protected $componentName;
 
-	/** @var Logger */
-	protected $logger;
+    /** @var Logger */
+    protected $logger;
 
-	/** @var Temp */
-	protected $temp;
+    /** @var Temp */
+    protected $temp;
 
-	public function __construct($componentName, WriterFactory $writerFactory, Logger $logger, Temp $temp)
-	{
-		$this->componentName = $componentName;
-		$this->logger = $logger;
-		$this->temp = $temp;
+    public function __construct($componentName, WriterFactory $writerFactory, Logger $logger, Temp $temp)
+    {
+        $this->componentName = $componentName;
+        $this->logger = $logger;
+        $this->temp = $temp;
         $this->writerFactory = $writerFactory;
-	}
+    }
 
     /**
      * @param $id
@@ -52,12 +52,13 @@ class Executor extends BaseExecutor
         if (!isset($component)) {
             throw new UserException("Component '{$id}' not found.");
         }
+
         return $component;
     }
 
 
-	public function execute(Job $job)
-	{
+    public function execute(Job $job)
+    {
         $options = $job->getParams();
         $driver = 'generic';
 
@@ -77,8 +78,10 @@ class Executor extends BaseExecutor
         $writerId = null;
         if (isset($options['config'])) {
             $writerId = $options['config'];
-        } else if (isset($options['writer'])) {
-            $writerId = $options['writer'];
+        } else {
+            if (isset($options['writer'])) {
+                $writerId = $options['writer'];
+            }
         }
 
         if ($writerId == null) {
@@ -94,7 +97,7 @@ class Executor extends BaseExecutor
         }
 
         /** @var WriterInterface $writer */
-		$writer = $this->writerFactory->get($writerConfig['db']);
+        $writer = $this->writerFactory->get($writerConfig['db']);
 
         if (isset($params['table'])) {
             $sysTableName = $configuration->getWriterTableName($params['table']);
@@ -125,13 +128,18 @@ class Executor extends BaseExecutor
 
             if ($writer->isAsync()) {
                 try {
-                    $job = $this->storageApi->exportTableAsync($sourceTableId, [
-                        'columns' => $colNames,
-                        'gzip' => true
-                    ]);
-                    $fileInfo = $this->storageApi->getFile($job["file"]["id"], (new GetFileOptions())->setFederationToken(true));
+                    $job = $this->storageApi->exportTableAsync(
+                        $sourceTableId,
+                        [
+                            'columns' => $colNames,
+                            'gzip' => true
+                        ]);
+                    $fileInfo = $this->storageApi->getFile(
+                        $job["file"]["id"],
+                        (new GetFileOptions())->setFederationToken(true));
                 } catch (ClientException $e) {
-                    throw new UserException("Error exporting table from StorageAPI", $e, [
+                    throw new UserException(
+                        "Error exporting table from StorageAPI", $e, [
                         'message' => $e->getMessage()
                     ]);
                 }
@@ -143,11 +151,15 @@ class Executor extends BaseExecutor
 
                 $sourceFilename = $this->temp->createTmpFile(null, true);
                 try {
-                    $this->storageApi->exportTable($sourceTableId, $sourceFilename, [
-                        'columns' => $colNames
-                    ]);
+                    $this->storageApi->exportTable(
+                        $sourceTableId,
+                        $sourceFilename,
+                        [
+                            'columns' => $colNames
+                        ]);
                 } catch (ClientException $e) {
-                    throw new UserException("Error exporting table from StorageAPI", $e, [
+                    throw new UserException(
+                        "Error exporting table from StorageAPI", $e, [
                         'message' => $e->getMessage()
                     ]);
                 }
@@ -160,8 +172,8 @@ class Executor extends BaseExecutor
         }
 
         return [
-            'status'    => 'ok',
-            'uploaded'  => $uploaded
+            'status' => 'ok',
+            'uploaded' => $uploaded
         ];
-	}
+    }
 }

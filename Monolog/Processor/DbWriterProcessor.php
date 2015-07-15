@@ -31,7 +31,6 @@ class DbWriterProcessor
 
     /**
      * Process event record.
-     *
      * @param array $record Log Event.
      * @return array Log event.
      */
@@ -39,6 +38,7 @@ class DbWriterProcessor
     {
         $record['component'] = $this->componentName;
         $record['app'] = 'wr-db';
+
         return $record;
     }
 }

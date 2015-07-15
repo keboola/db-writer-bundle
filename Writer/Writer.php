@@ -15,25 +15,25 @@ use Keboola\Syrup\Exception\UserException;
 
 abstract class Writer implements WriterInterface
 {
-	/** @var Configuration */
-	protected $configuration;
+    /** @var Configuration */
+    protected $configuration;
 
-	/** @var Logger */
-	protected $logger;
+    /** @var Logger */
+    protected $logger;
 
-	/** @var Temp */
-	protected $temp;
+    /** @var Temp */
+    protected $temp;
 
-	/** @var SapiClient */
-	protected $storageApi;
+    /** @var SapiClient */
+    protected $storageApi;
 
-	protected $db;
+    protected $db;
 
     protected $async = false;
 
-	public function __construct($dbParams, Logger $logger)
-	{
-		$this->logger = $logger;
+    public function __construct($dbParams, Logger $logger)
+    {
+        $this->logger = $logger;
 
         try {
             $this->db = $this->createConnection($dbParams);
@@ -43,12 +43,12 @@ abstract class Writer implements WriterInterface
             }
             throw new UserException("Error connecting to DB: " . $e->getMessage(), $e);
         }
-	}
+    }
 
-	public function getConnection()
-	{
-		return $this->db;
-	}
+    public function getConnection()
+    {
+        return $this->db;
+    }
 
     /**
      * @return boolean
