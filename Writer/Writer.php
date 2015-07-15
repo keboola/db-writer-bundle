@@ -29,6 +29,8 @@ abstract class Writer implements WriterInterface
 
 	protected $db;
 
+    protected $async = false;
+
 	public function __construct($dbParams, Logger $logger)
 	{
 		$this->logger = $logger;
@@ -47,4 +49,18 @@ abstract class Writer implements WriterInterface
 	{
 		return $this->db;
 	}
+
+    /**
+     * @return boolean
+     */
+    public function isAsync()
+    {
+        return $this->async;
+    }
+
+    public function writeAsync($tableId, $outputTableName)
+    {
+        throw new ApplicationException("Not implemented.");
+    }
+
 }

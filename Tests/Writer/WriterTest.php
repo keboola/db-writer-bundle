@@ -20,7 +20,6 @@ class WriterTest extends AbstractTest
         $writerData = $this->prepareConfig('mysql');
         $this->write($writerData['id']);
     }
-
     public function testRunOracle()
     {
         $writerData = $this->prepareConfig('oracle');
