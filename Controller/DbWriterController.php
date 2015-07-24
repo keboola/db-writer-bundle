@@ -142,16 +142,16 @@ class DbWriterController extends ApiController
         $this->logger->info(
             'Job created',
             [
-                'sqsQueue' => $queueName,
+                'sqsQueue'     => $queueName,
                 'sqsMessageId' => $messageId,
-                'job' => $job->getLogData()
+                'job'          => $job->getLogData()
             ]);
 
         // Response with link to job resource
         return $this->createJsonResponse(
             [
-                'id' => $jobId,
-                'url' => $this->getJobUrl($jobId),
+                'id'     => $jobId,
+                'url'    => $this->getJobUrl($jobId),
                 'status' => $job->getStatus()
             ],
             202);
@@ -242,14 +242,9 @@ class DbWriterController extends ApiController
      */
     public function getCredentialsAction($writerId)
     {
-        $credentials = $this->getConfiguration()->getCredentials($writerId);
-        $response = $this->createJsonResponse(
-            $credentials
+        return $this->createJsonResponse(
+            $this->getConfiguration()->getCredentials($writerId)
         );
-        if (empty($credentials)) {
-            $response->setData((object) []);
-        }
-        return $response;
     }
 
 
@@ -295,7 +290,7 @@ class DbWriterController extends ApiController
         return $this->createJsonResponse(
             [
                 'writerId' => $writerId,
-                'tableId' => $sysTableId
+                'tableId'  => $sysTableId
             ]);
     }
 
@@ -327,7 +322,7 @@ class DbWriterController extends ApiController
         return $this->createJsonResponse(
             [
                 'writerId' => $writerId,
-                'tableId' => $sysTableId
+                'tableId'  => $sysTableId
             ]);
     }
 
@@ -353,11 +348,11 @@ class DbWriterController extends ApiController
             ->getJobs(
                 [
                     'component' => $this->getParameter("app_name"),
-                    'runId' => $runId,
-                    'query' => $query,
+                    'runId'     => $runId,
+                    'query'     => $query,
                     'projectId' => $projectId,
-                    'offset' => $offset,
-                    'limit' => $limit
+                    'offset'    => $offset,
+                    'limit'     => $limit
                 ]);
 
         $jobs = array_map(
@@ -387,7 +382,7 @@ class DbWriterController extends ApiController
                 [
                     'projectId' => $projectId,
                     'component' => $this->getParameter("app_name"),
-                    'query' => $query
+                    'query'     => $query
                 ]);
 
         $jobMapper = $this->getJobMapper();
