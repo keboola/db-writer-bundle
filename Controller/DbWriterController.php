@@ -242,9 +242,14 @@ class DbWriterController extends ApiController
      */
     public function getCredentialsAction($writerId)
     {
-        return $this->createJsonResponse(
-            $this->getConfiguration()->getCredentials($writerId)
+        $credentials = $this->getConfiguration()->getCredentials($writerId);
+        $response = $this->createJsonResponse(
+            $credentials
         );
+        if (empty($credentials)) {
+            $response->setData((object) []);
+        }
+        return $response;
     }
 
 

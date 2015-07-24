@@ -145,7 +145,7 @@ class Configuration
     {
         $sysBucketConfig = $this->readBucketConfig($this->getSysBucketId($writerId));
         if (!isset($sysBucketConfig['db'])) {
-            return (object) [];
+            return [];
         }
         $credentials = $sysBucketConfig['db'];
 
