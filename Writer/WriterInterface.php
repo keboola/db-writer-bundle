@@ -17,7 +17,7 @@ interface WriterInterface
 
     public function writeAsync($tableId, $outputTableName);
 
-    public function isTableValid(array $table);
+    public function isTableValid(array $table, $ignoreExport = false);
 
     public function drop($tableName);
 

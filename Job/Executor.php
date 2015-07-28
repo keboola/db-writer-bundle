@@ -99,19 +99,20 @@ class Executor extends BaseExecutor
         /** @var WriterInterface $writer */
         $writer = $this->writerFactory->get($writerConfig['db']);
 
-        if (isset($params['table'])) {
-            $sysTableName = $configuration->getWriterTableName($params['table']);
-            if (isset($tables[$sysTableName])) {
-                $tables = [
-                    $tables[$sysTableName]
-                ];
-            }
+        if (isset($options['table'])) {
+            $sysTableName = $configuration->getWriterTableName($options['table']);
+            $tables = [
+                $tables[$sysTableName]
+            ];
         }
 
         $uploaded = [];
         foreach ($tables as $table) {
-
-            if (!$writer->isTableValid($table)) {
+            $ignoreExport = false;
+            if (isset($options['table'])) {
+                $ignoreExport = true;
+            }
+            if (!$writer->isTableValid($table, $ignoreExport)) {
                 $this->logger->warn("Table {$table["tableId"]} not exported.");
                 continue;
             }
