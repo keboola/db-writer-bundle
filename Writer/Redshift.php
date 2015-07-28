@@ -16,7 +16,9 @@ class Redshift extends Writer implements WriterInterface
         'smallint', 'integer', 'bigint', 'decimal', 'real', 'double precision', 'boolean', 'char', 'varchar', 'date', 'timestamp'
     ];
 
-    /** @var \PDO */
+    /**
+     * @var \PDO
+     */
     protected $db;
 
     protected $async = true;
@@ -118,10 +120,18 @@ class Redshift extends Writer implements WriterInterface
         try {
             $this->db->exec($command);
         } catch (\PDOException $e) {
-            throw new UserException(
-                "Query failed: " . $e->getMessage(), $e, [
-                'query' => $command
-            ]);
+            $query = $this->db->query("SELECT * FROM stl_load_errors WHERE query = pg_last_query_id();");
+            $result = $query->fetchAll();
+            $params = [
+                "query" => $command
+            ];
+            if (count($result)) {
+                $message = "Table '{$table}', column '" . trim($result[0]["colname"]) . "', line {$result[0]["line_number"]}: ". trim($result[0]["err_reason"]);
+                $params["redshift_errors"] = $result;
+            } else {
+                $message = "Query failed: " . $e->getMessage();
+            }
+            throw new UserException($message, $e, $params);
         }
 
     }
