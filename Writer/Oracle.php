@@ -86,7 +86,7 @@ class Oracle extends Writer implements WriterInterface
         }
     }
 
-    public function isTableValid(array $table)
+    public function isTableValid(array $table, $ignoreExport = false)
     {
         if (!count($table['items'])) {
             return false;
@@ -100,7 +100,7 @@ class Oracle extends Writer implements WriterInterface
             return false;
         }
 
-        if (!isset($table['export']) || $table['export'] == false) {
+        if (!$ignoreExport && (!isset($table['export']) || $table['export'] == false)) {
             return false;
         }
 
