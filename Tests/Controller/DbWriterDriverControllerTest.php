@@ -113,8 +113,14 @@ class DbWriterDriverControllerTest extends AbstractTest
             ->getContent();
         $response = json_decode($responseJson, true);
 
-        $this->assertEquals('test', $response[0]['id']);
-        $this->assertEquals('test', $response[0]['name']);
+        $writerExists = false;
+        foreach ($response as $writer) {
+            if ('test' == $writer['id'] && 'test' == $writer['name']) {
+                $writerExists = true;
+            }
+        }
+
+        $this->assertTrue($writerExists);
     }
 
     public function testGetWriterDriverAction()
@@ -145,7 +151,15 @@ class DbWriterDriverControllerTest extends AbstractTest
         $writers = $this->configuration->getWriters();
 
         $this->assertEquals(204, $response->getStatusCode());
-        $this->assertEmpty($writers);
+
+        $writerExists = false;
+        foreach ($writers as $writer) {
+            if ($writer['id'] == $this->writerId) {
+                $writerExists = true;
+            }
+        }
+
+        $this->assertFalse($writerExists);
     }
 
     /** Credentials */

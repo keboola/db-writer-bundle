@@ -26,7 +26,8 @@ class MySQL extends Writer implements WriterInterface
     {
         // convert errors to PDOExceptions
         $options = [
-            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            \PDO::MYSQL_ATTR_LOCAL_INFILE => true
         ];
 
         // check params
@@ -92,47 +93,21 @@ class MySQL extends Writer implements WriterInterface
 
     public function write($sourceFilename, $outputTableName, $table)
     {
-        $csv = new CsvFile($sourceFilename);
+        $query = "
+            LOAD DATA LOCAL INFILE '{$sourceFilename}'
+            INTO TABLE `{$outputTableName}`
+            FIELDS TERMINATED BY ','
+            OPTIONALLY ENCLOSED BY '\"'
+            ESCAPED BY ''
+            IGNORE 1 LINES
+        ";
 
-        $colNames = [];
-        foreach ($table['items'] as $item) {
-            if ($item['type'] != 'IGNORE') {
-                $colNames[] = $item['dbName'];
-            }
-        }
-
-        $header = array_map(
-            function ($item) {
-                return "`$item`";
-            },
-            $colNames);
-
-        $csv->getHeader();
-        $csv->next();
-
-        while ($csv->current() != null) {
-            $questionMarks = [];
-            $data = [];
-            for ($i = 0; $i < 1000 && $csv->current() != null; $i++) {
-                $questionMarks[] = sprintf('(%s)', $this->getPlaceholders($csv->current()));
-                $data = array_merge($data, $csv->current());
-                $csv->next();
-            }
-
-            $sql = sprintf(
-                "INSERT INTO `$outputTableName` (%s) VALUES %s;",
-                implode(',', $header),
-                implode(',', $questionMarks));
-
-            try {
-                $stmt = $this->db->prepare($sql);
-                $result = $stmt->execute($data);
-            } catch (\PDOException $e) {
-                throw new UserException(
-                    "Query failed: " . $e->getMessage(), $e, [
-                    'query' => $sql
-                ]);
-            }
+        try {
+            $this->db->exec($query);
+        } catch (\PDOException $e) {
+            throw new UserException("Query failed: " . $e->getMessage(), $e, [
+                'query' => $query
+            ]);
         }
     }
 

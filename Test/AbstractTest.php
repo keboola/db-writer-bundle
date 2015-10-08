@@ -59,6 +59,7 @@ class AbstractTest extends WebTestCase
 
         // Cleanup
         $sysBucketId = $this->configuration->getSysBucketId($this->writerId);
+
         if ($this->storageApi->bucketExists($sysBucketId)) {
             $accTables = $this->storageApi->listTables($sysBucketId);
             foreach ($accTables as $table) {
