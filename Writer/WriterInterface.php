@@ -24,4 +24,6 @@ interface WriterInterface
     public function create(array $table);
 
     public static function getAllowedTypes();
+
+    public function isAsync();
 }

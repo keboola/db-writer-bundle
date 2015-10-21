@@ -169,27 +169,16 @@ class Configuration
         $writerBuckets = array_filter(
             $buckets,
             function ($item) {
+                $attrWriter = $this->getSapiAttribute($item['attributes'], 'writer');
+                $attrDriver = $this->getSapiAttribute($item['attributes'], 'driver');
                 return (
-                    $this->getSapiAttribute($item['attributes'], 'writer') == 'db'
+                    $attrWriter == 'db'
                     &&
                     (
-                        (
-                            $this->driver == 'generic'
-                            &&
-                            (
-                                $this->getSapiAttribute($item['attributes'], 'driver') == $this->driver
-                                ||
-                                $this->getSapiAttribute($item['attributes'], 'driver') == null
-                            )
-                        )
+                        $this->driver == 'generic'
                         ||
-                        (
-                            $this->driver != 'generic'
-                            &&
-                            $this->getSapiAttribute($item['attributes'], 'driver') == $this->driver
-                        )
+                        $this->driver == $attrDriver
                     )
-
                 );
             });
 
