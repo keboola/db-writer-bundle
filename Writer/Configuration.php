@@ -175,7 +175,7 @@ class Configuration
                     $attrWriter == 'db'
                     &&
                     (
-                        $this->driver == 'generic'
+                        $this->driver == 'generic' && $attrDriver == null
                         ||
                         $this->driver == $attrDriver
                     )
