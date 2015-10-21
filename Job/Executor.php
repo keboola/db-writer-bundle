@@ -62,8 +62,8 @@ class Executor extends BaseExecutor
         $options = $job->getParams();
         $driver = 'generic';
 
-        if (isset($options["component"])) {
-            $component = $this->getComponent($options["component"]);
+        if (isset($options['component'])) {
+            $component = $this->getComponent($options['component']);
             $processor = new DbWriterProcessor($component['id']);
             $this->logger->pushProcessor([$processor, 'processRecord']);
 
@@ -85,7 +85,7 @@ class Executor extends BaseExecutor
         }
 
         if ($writerId == null) {
-            throw new UserException('Parameter "config" or "writer" must be specified');
+            throw new UserException("Parameter 'config' or 'writer' must be specified");
         }
 
         $configuration = new Configuration($this->componentName, $this->storageApi, $driver);
@@ -101,6 +101,11 @@ class Executor extends BaseExecutor
 
         if (isset($options['table'])) {
             $sysTableName = $configuration->getWriterTableName($options['table']);
+
+            if (!isset($tables[$sysTableName])) {
+                throw new UserException(sprintf("Table '%s' not found", $sysTableName));
+            }
+
             $tables = [
                 $tables[$sysTableName]
             ];
@@ -113,7 +118,7 @@ class Executor extends BaseExecutor
                 $ignoreExport = true;
             }
             if (!$writer->isTableValid($table, $ignoreExport)) {
-                $this->logger->warn("Table {$table["tableId"]} not exported.");
+                $this->logger->warning(sprintf("Table '%s' not exported", $table["tableId"]));
                 continue;
             }
 
