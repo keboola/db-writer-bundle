@@ -89,6 +89,25 @@ keboola_db_writer_driver_post_tables:
     defaults: { _controller: KeboolaDbWriterBundle:DbWriter:postTable, driver: null }
     methods:  [POST]
 
+keboola_db_writer_get_config_tables:
+    path: /{writerId}/config-tables/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getConfigTables, id: null }
+    methods:  [GET]
+
+keboola_db_writer_driver_get_config_tables:
+    path: /{driver}/{writerId}/config-tables/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:getConfigTables, id: null, driver: null }
+    methods:  [GET]
+
+keboola_db_writer_delete_config_table:
+    path: /{writerId}/config-tables/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteConfigTable }
+    methods:  [DELETE]
+
+keboola_db_writer_driver_delete_config_table:
+    path: /{driver}/{writerId}/config-tables/{id}
+    defaults: { _controller: KeboolaDbWriterBundle:DbWriter:deleteConfigTable, driver: null }
+    methods:  [DELETE]
 
 # Columns
 keboola_db_writer_post_columns:

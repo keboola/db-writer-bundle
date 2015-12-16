@@ -9,6 +9,7 @@ namespace Keboola\DbWriterBundle\Writer;
 
 use Keboola\DbWriterBundle\Model\TableFactory;
 use Keboola\StorageApi\Client as StorageApi;
+use Keboola\StorageApi\ClientException;
 use Keboola\StorageApi\Config\Exception;
 use Keboola\StorageApi\Config\Reader;
 use Keboola\Syrup\Exception\UserException;
@@ -96,7 +97,7 @@ class Configuration
         return $outTables;
     }
 
-    protected function getWriterTables($writerId)
+    public function getWriterTables($writerId)
     {
         return $this->storageApi->listTables($this->getSysBucketId($writerId));
     }
@@ -360,6 +361,17 @@ class Configuration
         $table->save();
 
         return $table->getId();
+    }
+
+    public function deleteTable($writerId, $id)
+    {
+        $table = $this->tableFactory->get($writerId, $id);
+
+        try {
+            $this->storageApi->dropTable($table->getId());
+        } catch (ClientException $e) {
+            // table already deleted
+        }
     }
 
 }

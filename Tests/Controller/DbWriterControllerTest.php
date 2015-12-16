@@ -252,4 +252,84 @@ class DbWriterControllerTest extends AbstractTest
 
         return $jobFactory->create($command, $params);
     }
+
+    /** Config Table */
+
+    public function testGetConfigTablesAction()
+    {
+        $this->createWriter();
+        $testing = $this->container->getParameter('testing');
+
+        $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
+        $this->configuration->updateTableColumns($this->writerId, $testing['table']['id'], $testing['columns']);
+
+        self::$client->request(
+            'GET',
+            $this->componentName . '/' . $this->writerId . '/config-tables'
+        );
+
+        $responseJson = self::$client->getResponse()->getContent();
+        $response = json_decode($responseJson, true);
+
+        $response = array_shift($response);
+
+        $this->assertEquals($testing['table']['id'], $response['id']);
+        $this->assertEquals($testing['table']['dbName'], $response['name']);
+        $this->assertEquals($testing['table']['export'], $response['export']);
+        $this->assertNotEmpty($response['bucket']);
+        $this->assertNotEmpty($response['lastChange']);
+        $this->assertNotEmpty($response['columns']);
+
+        $col = $response['columns'][0];
+        $this->assertNotEmpty($col['name']);
+        $this->assertNotEmpty($col['dbName']);
+        $this->assertNotEmpty($col['type']);
+        $this->assertEquals('INT', $col['type']);
+    }
+
+    public function testGetConfigTable()
+    {
+        $this->createWriter();
+        $testing = $this->container->getParameter('testing');
+
+        $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
+        $this->configuration->updateTableColumns($this->writerId, $testing['table']['id'], $testing['columns']);
+
+        self::$client->request(
+            'GET',
+            $this->componentName . '/' . $this->writerId . '/config-tables/' . $testing['table']['id']
+        );
+
+        $responseJson = self::$client->getResponse()->getContent();
+        $response = json_decode($responseJson, true);
+
+        $this->assertEquals($testing['table']['id'], $response['id']);
+        $this->assertEquals($testing['table']['dbName'], $response['name']);
+        $this->assertEquals($testing['table']['export'], $response['export']);
+        $this->assertNotEmpty($response['bucket']);
+        $this->assertNotEmpty($response['lastChange']);
+        $this->assertNotEmpty($response['columns']);
+
+        $col = $response['columns'][0];
+        $this->assertNotEmpty($col['name']);
+        $this->assertNotEmpty($col['dbName']);
+        $this->assertNotEmpty($col['type']);
+        $this->assertEquals('INT', $col['type']);
+    }
+
+    public function testDeleteConfigTableAction()
+    {
+        $this->createWriter();
+        $testing = $this->container->getParameter('testing');
+
+        $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
+        $this->configuration->updateTableColumns($this->writerId, $testing['table']['id'], $testing['columns']);
+
+        self::$client->request(
+            'DELETE',
+            $this->componentName . '/' . $this->writerId . '/config-tables/' . $testing['table']['id']
+        );
+
+        $this->assertEquals(204, self::$client->getResponse()->getStatusCode());
+    }
 }

@@ -294,6 +294,42 @@ class DbWriterController extends ApiController
             ]);
     }
 
+    public function getConfigTablesAction($writerId, $id)
+    {
+        $tables = $this->getConfiguration()->getSysTables($writerId);
+
+        if ($id !== null) {
+            $tableName = $this->getConfiguration()->getWriterTableName($id);
+
+            return $this->createJsonResponse($this->formatTableResponse($tables[$tableName]));
+        }
+
+        return $this->createJsonResponse(array_map(function ($item) {
+            return $this->formatTableResponse($item);
+        }, $tables));
+    }
+
+    private function formatTableResponse($table)
+    {
+        $tableNameArr = explode('.', $table['id']);
+
+        return [
+            'id' => $table['id'],
+            'bucket' => $tableNameArr[0] . '.' . $tableNameArr[1],
+            'name' => $table['dbName'],
+            'export' => $table['export'],
+            'lastChange' => $table['lastChange'],
+            'columns' => $table['items']
+        ];
+    }
+
+    public function deleteConfigTableAction($writerId, $id)
+    {
+        $this->getConfiguration()->deleteTable($writerId, $id);
+
+        return $this->createJsonResponse([], 204);
+    }
+
     /**
      * @param         $writerId
      * @param         $tableId
