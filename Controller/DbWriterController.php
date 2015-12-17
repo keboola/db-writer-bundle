@@ -314,7 +314,7 @@ class DbWriterController extends ApiController
         $tableNameArr = explode('.', $table['id']);
 
         return [
-            'id' => $table['id'],
+            'id' => $table['tableId'],
             'bucket' => $tableNameArr[0] . '.' . $tableNameArr[1],
             'name' => $table['dbName'],
             'export' => $table['export'],
