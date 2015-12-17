@@ -314,7 +314,7 @@ class DbWriterController extends ApiController
 
     private function formatTableResponse($table)
     {
-        $tableNameArr = explode('.', $table['id']);
+        $tableNameArr = explode('.', $table['tableId']);
 
         return [
             'id' => $table['tableId'],
