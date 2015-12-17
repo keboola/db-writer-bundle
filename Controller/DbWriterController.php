@@ -304,9 +304,12 @@ class DbWriterController extends ApiController
             return $this->createJsonResponse($this->formatTableResponse($tables[$tableName]));
         }
 
-        return $this->createJsonResponse(array_map(function ($item) {
-            return $this->formatTableResponse($item);
-        }, $tables));
+        $res = [];
+        foreach ($tables as $table) {
+            $res[] = $this->formatTableResponse($table);
+        }
+
+        return $this->createJsonResponse($res);
     }
 
     private function formatTableResponse($table)
