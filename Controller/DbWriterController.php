@@ -320,7 +320,7 @@ class DbWriterController extends ApiController
             'id' => $table['tableId'],
             'bucket' => $tableNameArr[0] . '.' . $tableNameArr[1],
             'name' => $table['dbName'],
-            'export' => $table['export'],
+            'export' => (bool) $table['export'],
             'lastChange' => $table['lastChange'],
             'columns' => $table['items']
         ];

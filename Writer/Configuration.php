@@ -250,7 +250,6 @@ class Configuration
         }
 
         //@todo cleanup script
-
         return $tables;
     }
 
@@ -306,7 +305,7 @@ class Configuration
             'id' => $id,
             'bucket' => $outTable['bucket']['id'],
             'name' => is_null($sysTable) ? $id : $sysTable['dbName'],
-            'export' => is_null($sysTable) ? false : $sysTable['export'],
+            'export' => !is_null($sysTable) && $sysTable['export'],
             'lastChange' => is_null($sysTable) ? 'N/A' : $sysTable['lastChange'],
             'columns' => $columns
         ];
