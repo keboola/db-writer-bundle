@@ -145,7 +145,7 @@ class Oracle extends Writer implements WriterInterface
 
             $null = $col['null'] ? 'NULL' : 'NOT NULL';
 
-            $default = empty($col['default']) ? '' : $col['default'];
+            $default = empty($col['default']) ? '' : "DEFAULT '" . $col['default'] . "'";
             if ($type == 'TEXT') {
                 $default = '';
             }

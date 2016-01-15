@@ -169,6 +169,7 @@ class Executor extends BaseExecutor
                         'message' => $e->getMessage()
                     ]);
                 }
+
                 $writer->drop($outputTableName);
                 $writer->create($table);
                 $writer->write($sourceFilename, $outputTableName, $table);

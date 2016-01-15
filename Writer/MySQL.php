@@ -55,7 +55,7 @@ class MySQL extends Writer implements WriterInterface
 
     public function drop($tableName)
     {
-        $this->db->exec("DROP TABLE IF EXISTS `{$tableName}`;");
+        $this->exec("DROP TABLE IF EXISTS `{$tableName}`;");
     }
 
     public function create(array $table)
@@ -76,7 +76,7 @@ class MySQL extends Writer implements WriterInterface
 
             $null = $col['null'] ? 'NULL' : 'NOT NULL';
 
-            $default = empty($col['default']) ? '' : $col['default'];
+            $default = empty($col['default']) ? '' : "DEFAULT '" . $col['default'] . "'";
             if ($type == 'TEXT') {
                 $default = '';
             }
@@ -88,7 +88,7 @@ class MySQL extends Writer implements WriterInterface
         $sql = substr($sql, 0, -1);
         $sql .= ");";
 
-        $this->db->exec($sql);
+        $this->exec($sql);
     }
 
     public function write($sourceFilename, $outputTableName, $table)
@@ -102,13 +102,7 @@ class MySQL extends Writer implements WriterInterface
             IGNORE 1 LINES
         ";
 
-        try {
-            $this->db->exec($query);
-        } catch (\PDOException $e) {
-            throw new UserException("Query failed: " . $e->getMessage(), $e, [
-                'query' => $query
-            ]);
-        }
+        $this->exec($query);
     }
 
     public function isTableValid(array $table, $ignoreExport = false)
@@ -141,6 +135,17 @@ class MySQL extends Writer implements WriterInterface
         }
 
         return true;
+    }
+
+    protected function exec($sql)
+    {
+        try {
+            $this->db->exec($sql);
+        } catch (\PDOException $e) {
+            throw new UserException("Query failed: " . $e->getMessage(), $e, [
+                'sql' => $sql
+            ]);
+        }
     }
 
     protected function getPlaceholders(array $row)
