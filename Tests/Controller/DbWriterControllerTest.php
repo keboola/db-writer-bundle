@@ -203,6 +203,10 @@ class DbWriterControllerTest extends AbstractTest
         $testing = $this->container->getParameter('testing');
         $this->configuration->updateTable($this->writerId, $testing['table']['id'], $testing['table']);
 
+        // change order of columns
+        unset($testing['columns'][1]['size']);
+        $testing['columns'][1]['size'] = 255;
+
         self::$client->request(
             'POST',
             $this->componentName . '/' . $this->writerId . '/tables/' . $testing['table']['id'] . '/columns',
@@ -212,9 +216,9 @@ class DbWriterControllerTest extends AbstractTest
             json_encode($testing['columns'])
         );
 
-        $this->assertEquals(200,
-            self::$client->getResponse()
-                ->getStatusCode());
+        $this->assertEquals(200, self::$client->getResponse()->getStatusCode());
+        $sysTable = array_shift($this->configuration->getSysTables($this->writerId));
+        $this->assertEquals($testing['columns'], $sysTable['items']);
     }
 
     /** Jobs */

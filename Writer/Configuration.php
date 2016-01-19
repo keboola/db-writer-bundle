@@ -347,16 +347,28 @@ class Configuration
     public function updateTableColumns($writerId, $tableId, $params)
     {
         $table = $this->tableFactory->get($writerId, $tableId);
-        if (!$this->getStorageApi()
-            ->tableExists($table->getId())
-        ) {
+        if (!$this->getStorageApi()->tableExists($table->getId())) {
             $table->setAttribute('tableId', $tableId);
             $table->setAttribute('dbName', $tableId);
             $table->setAttribute('export', 0);
             $table->setAttribute('lastChange', date('c'));
         }
 
-        $table->setFromArray($params);
+        $table->setHeader(['name', 'dbName', 'type', 'size', 'null', 'default']);
+
+        $columns = [];
+        foreach ($params as $row) {
+            $columns[] = [
+                'name' => $row['name'],
+                'dbName' => $row['dbName'],
+                'type' => $row['type'],
+                'size' => $row['size'],
+                'null' => $row['null'],
+                'default' => $row['default']
+            ];
+        }
+
+        $table->setFromArray($columns);
         $table->save();
 
         return $table->getId();
